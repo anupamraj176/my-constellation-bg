@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Constellation Background</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #000;
+      height: 100%;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+
+  <script>
+    class ConstellationBackground {
+      constructor(canvas, options = {}) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.options = {
+          starCount: 150,
+          maxDistance: 150,
+          mouseRadius: 200,
+          backgroundColor: 'rgba(0, 0, 0, 0.1)',
+          starColor: '#ffffff',
+          lineColor: 'rgba(255, 255, 255, 0.2)',
+          speed: 0.5,
+          ...options
+        };
+
+        this.stars = [];
+        this.mouse = { x: 0, y: 0 };
+        this.animationId = null;
+
+        this.resize();
+        this.initStars();
+        this.bindEvents();
+        this.animate();
+      }
+
+      resize() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+      }
+
+      initStars() {
+        const { starCount } = this.options;
+        this.stars = [];
+        for (let i = 0; i < starCount; i++) {
+          this.stars.push({
+            x: Math.random() * this.canvas.width,
+            y: Math.random() * this.canvas.height,
+            radius: Math.random() * 1.5 + 0.5,
+            vx: (Math.random() - 0.5) * this.options.speed,
+            vy: (Math.random() - 0.5) * this.options.speed
+          });
+        }
+      }
+
+      bindEvents() {
+        window.addEventListener('resize', () => this.resize());
+        window.addEventListener('mousemove', (e) => {
+          this.mouse.x = e.clientX;
+          this.mouse.y = e.clientY;
+        });
+      }
+
+      animate() {
+        const { ctx, canvas, options, stars, mouse } = this;
+
+        // Fade effect
+        ctx.fillStyle = options.backgroundColor;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Update and draw stars
+        stars.forEach(star => {
+          const dx = mouse.x - star.x;
+          const dy = mouse.y - star.y;
+          const dist = Math.hypot(dx, dy);
+
+          if (dist < options.mouseRadius) {
+            star.x += dx * 0.0002;
+            star.y += dy * 0.0002;
+          }
+
+          star.x += star.vx;
+          star.y += star.vy;
+
+          // Wrap around edges (optional: bounce with star.vx *= -1)
+          if (star.x < 0) star.x = canvas.width;
+          if (star.x > canvas.width) star.x = 0;
+          if (star.y < 0) star.y = canvas.height;
+          if (star.y > canvas.height) star.y = 0;
+
+          ctx.beginPath();
+          ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+          ctx.fillStyle = options.starColor;
+          ctx.fill();
+        });
+
+        // Draw lines
+        ctx.strokeStyle = options.lineColor;
+        ctx.lineWidth = 0.5;
+        for (let i = 0; i < stars.length; i++) {
+          for (let j = i + 1; j < stars.length; j++) {
+            const s1 = stars[i];
+            const s2 = stars[j];
+            const dist = Math.hypot(s1.x - s2.x, s1.y - s2.y);
+            if (dist < options.maxDistance) {
+              ctx.globalAlpha = 1 - dist / options.maxDistance; // Fade lines
+              ctx.beginPath();
+              ctx.moveTo(s1.x, s1.y);
+              ctx.lineTo(s2.x, s2.y);
+              ctx.stroke();
+              ctx.globalAlpha = 1;
+            }
+          }
+        }
+
+        this.animationId = requestAnimationFrame(() => this.animate());
+      }
+
+      destroy() {
+        cancelAnimationFrame(this.animationId);
+      }
+    }
+
+    // Start the animation when page loads
+    window.addEventListener('load', () => {
+      const canvas = document.getElementById('canvas');
+      new ConstellationBackground(canvas, {
+        starCount: 200,
+        maxDistance: 160,
+        mouseRadius: 180
+      });
+    });
+  </script>
+</body>
+</html>

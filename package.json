@@ -1,0 +1,31 @@
+{
+  "name": "my-constellation-bg",
+  "version": "1.0.0",
+  "description": "A beautiful animated constellation background with mouse interaction",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "constellation",
+    "canvas",
+    "background",
+    "animation",
+    "stars"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/my-constellation-bg.git"
+  },
+  "type": "commonjs",
+ "scripts": {
+  "build": "esbuild src/index.js --bundle --outfile=dist/index.js --format=iife --global-name=ConstellationBackground"
+},
+  "devDependencies": {
+    "esbuild": "^0.27.2"
+  }
+}
