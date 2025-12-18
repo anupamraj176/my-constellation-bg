@@ -3,22 +3,57 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Constellation Background</title>
+  <title>Grok-Style Background</title>
   <style>
-    body, html {
+    * {
       margin: 0;
       padding: 0;
-      overflow: hidden;
-      background: #000;
-      height: 100%;
+      box-sizing: border-box;
     }
-    canvas {
+
+    body {
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    #constellation-canvas {
       display: block;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+    }
+
+    .content-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: white;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .logo {
+      font-size: 48px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 2px;
+    }
+
+    .tagline {
+      font-size: 18px;
+      color: rgba(255, 255, 255, 0.7);
     }
   </style>
 </head>
 <body>
-  <canvas id="canvas"></canvas>
+  <canvas id="constellation-canvas"></canvas>
+  
+  <div class="content-overlay">
+    <div class="logo">GROK</div>
+    <div class="tagline">Move your mouse to interact</div>
+  </div>
 
   <script>
     class ConstellationBackground {
@@ -26,19 +61,22 @@
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
         this.options = {
-          starCount: 150,
-          maxDistance: 150,
-          mouseRadius: 200,
-          backgroundColor: 'rgba(0, 0, 0, 0.1)',
+          starCount: 200,
+          maxDistance: 120,
+          mouseRadius: 180,
+          backgroundColor: '#000000',
           starColor: '#ffffff',
-          lineColor: 'rgba(255, 255, 255, 0.2)',
-          speed: 0.5,
+          lineColor: 'rgba(255, 255, 255, 0.15)',
+          meteorCount: 3,
+          meteorInterval: 3000,
           ...options
         };
 
         this.stars = [];
-        this.mouse = { x: 0, y: 0 };
+        this.meteors = [];
+        this.mouse = { x: -1000, y: -1000 };
         this.animationId = null;
+        this.lastMeteorTime = 0;
 
         this.resize();
         this.initStars();
@@ -47,8 +85,9 @@
       }
 
       resize() {
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
+        this.canvas.width = this.canvas.offsetWidth || window.innerWidth;
+        this.canvas.height = this.canvas.offsetHeight || window.innerHeight;
+        this.initStars();
       }
 
       initStars() {
@@ -58,43 +97,69 @@
           this.stars.push({
             x: Math.random() * this.canvas.width,
             y: Math.random() * this.canvas.height,
-            radius: Math.random() * 1.5 + 0.5,
-            vx: (Math.random() - 0.5) * this.options.speed,
-            vy: (Math.random() - 0.5) * this.options.speed
+            radius: Math.random() * 1.2 + 0.3,
+            vx: (Math.random() - 0.5) * 0.15,
+            vy: (Math.random() - 0.5) * 0.15,
+            brightness: Math.random() * 0.5 + 0.5
           });
         }
       }
 
-      bindEvents() {
-        window.addEventListener('resize', () => this.resize());
-        window.addEventListener('mousemove', (e) => {
-          this.mouse.x = e.clientX;
-          this.mouse.y = e.clientY;
+      createMeteor() {
+        const startX = Math.random() * this.canvas.width;
+        const startY = -50;
+        const angle = Math.random() * Math.PI / 6 + Math.PI / 12;
+        const speed = Math.random() * 3 + 4;
+        
+        this.meteors.push({
+          x: startX,
+          y: startY,
+          vx: Math.sin(angle) * speed,
+          vy: Math.cos(angle) * speed,
+          length: Math.random() * 60 + 40,
+          opacity: 1,
+          tail: []
         });
       }
 
-      animate() {
-        const { ctx, canvas, options, stars, mouse } = this;
+      bindEvents() {
+        window.addEventListener('resize', () => this.resize());
+        this.canvas.addEventListener('mousemove', (e) => {
+          const rect = this.canvas.getBoundingClientRect();
+          this.mouse.x = e.clientX - rect.left;
+          this.mouse.y = e.clientY - rect.top;
+        });
+        this.canvas.addEventListener('mouseleave', () => {
+          this.mouse.x = -1000;
+          this.mouse.y = -1000;
+        });
+      }
 
-        // Fade effect
+      animate(currentTime = 0) {
+        const { ctx, canvas, options, stars, mouse, meteors } = this;
+
         ctx.fillStyle = options.backgroundColor;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Update and draw stars
+        if (currentTime - this.lastMeteorTime > options.meteorInterval) {
+          this.createMeteor();
+          this.lastMeteorTime = currentTime;
+        }
+
         stars.forEach(star => {
           const dx = mouse.x - star.x;
           const dy = mouse.y - star.y;
           const dist = Math.hypot(dx, dy);
 
-          if (dist < options.mouseRadius) {
-            star.x += dx * 0.0002;
-            star.y += dy * 0.0002;
+          if (dist < options.mouseRadius && dist > 0) {
+            const force = (options.mouseRadius - dist) / options.mouseRadius;
+            star.x -= (dx / dist) * force * 2;
+            star.y -= (dy / dist) * force * 2;
           }
 
           star.x += star.vx;
           star.y += star.vy;
 
-          // Wrap around edges (optional: bounce with star.vx *= -1)
           if (star.x < 0) star.x = canvas.width;
           if (star.x > canvas.width) star.x = 0;
           if (star.y < 0) star.y = canvas.height;
@@ -102,11 +167,10 @@
 
           ctx.beginPath();
           ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-          ctx.fillStyle = options.starColor;
+          ctx.fillStyle = `rgba(255, 255, 255, ${star.brightness})`;
           ctx.fill();
         });
 
-        // Draw lines
         ctx.strokeStyle = options.lineColor;
         ctx.lineWidth = 0.5;
         for (let i = 0; i < stars.length; i++) {
@@ -114,33 +178,87 @@
             const s1 = stars[i];
             const s2 = stars[j];
             const dist = Math.hypot(s1.x - s2.x, s1.y - s2.y);
+            
             if (dist < options.maxDistance) {
-              ctx.globalAlpha = 1 - dist / options.maxDistance; // Fade lines
+              const opacity = (1 - dist / options.maxDistance) * 0.15;
+              ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
               ctx.beginPath();
               ctx.moveTo(s1.x, s1.y);
               ctx.lineTo(s2.x, s2.y);
               ctx.stroke();
-              ctx.globalAlpha = 1;
             }
           }
         }
 
-        this.animationId = requestAnimationFrame(() => this.animate());
+        for (let i = meteors.length - 1; i >= 0; i--) {
+          const meteor = meteors[i];
+          
+          meteor.x += meteor.vx;
+          meteor.y += meteor.vy;
+          meteor.opacity -= 0.005;
+
+          meteor.tail.unshift({ x: meteor.x, y: meteor.y });
+          if (meteor.tail.length > 20) meteor.tail.pop();
+
+          if (meteor.y > canvas.height + 100 || meteor.x > canvas.width + 100 || meteor.opacity <= 0) {
+            meteors.splice(i, 1);
+            continue;
+          }
+
+          for (let j = 0; j < meteor.tail.length; j++) {
+            const point = meteor.tail[j];
+            const nextPoint = meteor.tail[j + 1];
+            if (!nextPoint) continue;
+
+            const gradient = ctx.createLinearGradient(
+              point.x, point.y,
+              nextPoint.x, nextPoint.y
+            );
+            
+            const opacity = meteor.opacity * (1 - j / meteor.tail.length);
+            gradient.addColorStop(0, `rgba(255, 255, 255, ${opacity * 0.8})`);
+            gradient.addColorStop(0.5, `rgba(200, 220, 255, ${opacity * 0.4})`);
+            gradient.addColorStop(1, `rgba(150, 180, 255, 0)`);
+
+            ctx.strokeStyle = gradient;
+            ctx.lineWidth = 2 * (1 - j / meteor.tail.length);
+            ctx.beginPath();
+            ctx.moveTo(point.x, point.y);
+            ctx.lineTo(nextPoint.x, nextPoint.y);
+            ctx.stroke();
+          }
+
+          const headGradient = ctx.createRadialGradient(
+            meteor.x, meteor.y, 0,
+            meteor.x, meteor.y, 4
+          );
+          headGradient.addColorStop(0, `rgba(255, 255, 255, ${meteor.opacity})`);
+          headGradient.addColorStop(0.5, `rgba(200, 220, 255, ${meteor.opacity * 0.5})`);
+          headGradient.addColorStop(1, 'rgba(150, 180, 255, 0)');
+
+          ctx.fillStyle = headGradient;
+          ctx.beginPath();
+          ctx.arc(meteor.x, meteor.y, 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        this.animationId = requestAnimationFrame((time) => this.animate(time));
       }
 
       destroy() {
-        cancelAnimationFrame(this.animationId);
+        if (this.animationId) {
+          cancelAnimationFrame(this.animationId);
+        }
       }
     }
 
-    // Start the animation when page loads
-    window.addEventListener('load', () => {
-      const canvas = document.getElementById('canvas');
-      new ConstellationBackground(canvas, {
-        starCount: 200,
-        maxDistance: 160,
-        mouseRadius: 180
-      });
+    // Initialize
+    const canvas = document.getElementById('constellation-canvas');
+    const bg = new ConstellationBackground(canvas, {
+      starCount: 200,
+      maxDistance: 120,
+      mouseRadius: 180,
+      meteorInterval: 3000
     });
   </script>
 </body>
