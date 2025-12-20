@@ -1,6 +1,6 @@
 {
   "name": "my-constellation-bg",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "A beautiful animated constellation background with mouse interaction",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
