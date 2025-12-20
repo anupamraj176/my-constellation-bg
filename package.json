@@ -15,11 +15,11 @@
     "animation",
     "stars"
   ],
-  "author": "Your Name",
+  "author": "Anupam Raj",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yourusername/my-constellation-bg.git"
+    "url": "https://github.com/anupamraj176/my-constellation-bg"
   },
   "type": "commonjs",
   "scripts": {
