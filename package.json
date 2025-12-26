@@ -23,7 +23,7 @@
   },
   "type": "commonjs",
   "scripts": {
-    "build": "esbuild src/index.js --bundle --outfile=dist/index.js --format=iife --global-name=ConstellationBackground"
+    "build": "npx esbuild src/index.js --bundle --outfile=dist/index.js --format=iife --global-name=ConstellationBackground"
   },
   "devDependencies": {
     "esbuild": "^0.27.2"
