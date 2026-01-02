@@ -1,40 +1,56 @@
 /**
- * ConstellationBackground
- * Creates a Grok-style animated background with:
- * - Slowly blinking stars connected by lines
- * - Periodic falling meteors with trails
+ * RealisticStarfield
+ * Creates a realistic night sky background inspired by actual star photography
+ * Features:
+ * - Dense starfield with natural brightness distribution
+ * - Subtle twinkling animation
+ * - Shooting stars with varying speeds (slow, medium, fast)
+ * - Pure black deep space background
+ * - No constellation lines for realistic appearance
  */
-class ConstellationBackground {
+class RealisticStarfield {
   constructor(canvas, options = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
-    
-    // Configuration options with defaults
+
+    // Configuration for realistic starfield
     this.options = {
-      starCount: 200,                           // Number of stars to render
-      maxDistance: 120,                         // Maximum distance for star connections
-      backgroundColor: '#000000',               // Canvas background color
-      starColor: '#ffffff',                     // Base star color
-      lineColor: 'rgba(255, 255, 255, 0.15)',  // Connection line color
-      meteorInterval: 3000,                     // Time between meteors (ms)
-      ...options
+      // Star density - more stars for realistic look
+      starCount: 800,
+      // Background - pure black like deep space
+      backgroundColor: '#000000',
+      // Shooting star timing
+      meteorInterval: 8000,
+      // Fixed meteor angle (diagonal)
+      meteorAngle: 35,
+      // Enable/disable shooting stars
+      enableMeteors: true,
+      // Enable/disable twinkling
+      enableTwinkle: true,
+      // Twinkle intensity (0-1)
+      twinkleIntensity: 0.3,
+      ...options,
     };
 
-    // State arrays
     this.stars = [];
     this.meteors = [];
-    this.animationId = null;
     this.lastMeteorTime = 0;
+    this.animationId = null;
 
-    // Initialize
+    this.init();
+  }
+
+  /**
+   * Initialize the starfield
+   */
+  init() {
     this.resize();
-    this.initStars();
     this.bindEvents();
     this.animate();
   }
 
   /**
-   * Handle canvas resize - adjusts to container or window size
+   * Handle canvas resize
    */
   resize() {
     this.canvas.width = this.canvas.offsetWidth || window.innerWidth;
@@ -43,51 +59,131 @@ class ConstellationBackground {
   }
 
   /**
-   * Initialize stars with random positions and blinking properties
+   * Create realistic star distribution
+   * Most stars are tiny and dim, few are bright (like real night sky)
    */
   initStars() {
-    const { starCount } = this.options;
     this.stars = [];
-    
-    for (let i = 0; i < starCount; i++) {
+    const { starCount } = this.options;
+    const area = this.canvas.width * this.canvas.height;
+    // Adjust star count based on screen size for consistent density
+    const adjustedCount = Math.floor((starCount * area) / (1920 * 1080));
+
+    for (let i = 0; i < adjustedCount; i++) {
+      // Realistic magnitude distribution (most stars are dim)
+      const magnitude = Math.random();
+      let radius, brightness, twinkleAmount;
+
+      if (magnitude < 0.7) {
+        // 70% - Very dim, tiny stars (like distant stars)
+        radius = 0.3 + Math.random() * 0.4;
+        brightness = 0.15 + Math.random() * 0.25;
+        twinkleAmount = 0.1;
+      } else if (magnitude < 0.9) {
+        // 20% - Medium stars
+        radius = 0.5 + Math.random() * 0.6;
+        brightness = 0.4 + Math.random() * 0.3;
+        twinkleAmount = 0.2;
+      } else if (magnitude < 0.97) {
+        // 7% - Bright stars
+        radius = 0.8 + Math.random() * 0.8;
+        brightness = 0.7 + Math.random() * 0.2;
+        twinkleAmount = 0.3;
+      } else {
+        // 3% - Very bright stars (with glow effect)
+        radius = 1.2 + Math.random() * 1.0;
+        brightness = 0.85 + Math.random() * 0.15;
+        twinkleAmount = 0.15;
+      }
+
+      // Subtle color variations (like real stars)
+      const color = this.getStarColor();
+
       this.stars.push({
-        x: Math.random() * this.canvas.width,      // Random X position
-        y: Math.random() * this.canvas.height,     // Random Y position
-        radius: Math.random() * 1.2 + 0.3,         // Star size (0.3 to 1.5)
-        brightness: Math.random() * 0.5 + 0.5,     // Base brightness (0.5 to 1.0)
-        blinkSpeed: Math.random() * 0.002 + 0.001, // Blink speed variation
-        blinkOffset: Math.random() * Math.PI * 2   // Random starting phase
+        x: Math.random() * this.canvas.width,
+        y: Math.random() * this.canvas.height,
+        radius,
+        brightness,
+        baseBrightness: brightness,
+        twinkleSpeed: 0.0005 + Math.random() * 0.002,
+        twinkleOffset: Math.random() * Math.PI * 2,
+        twinkleAmount,
+        color,
+        hasGlow: magnitude >= 0.97,
       });
     }
   }
 
   /**
-   * Create a new falling meteor
+   * Get a subtle star color variation
+   */
+  getStarColor() {
+    const colorType = Math.random();
+    if (colorType < 0.6) {
+      return { r: 255, g: 255, b: 255 }; // White
+    } else if (colorType < 0.75) {
+      return { r: 255, g: 252, b: 240 }; // Warm white
+    } else if (colorType < 0.9) {
+      return { r: 240, g: 245, b: 255 }; // Cool white/blue
+    } else {
+      return { r: 255, g: 248, b: 220 }; // Slight yellow
+    }
+  }
+
+  /**
+   * Create shooting star with realistic trajectory and varying speeds
    */
   createMeteor() {
-    // Random starting position at top of screen
-    const startX = Math.random() * this.canvas.width;
-    const startY = -50;
-    
-    // Calculate diagonal trajectory (15-45 degrees)
-    const angle = Math.random() * Math.PI / 6 + Math.PI / 12;
-    const speed = Math.random() * 3 + 4;
-    
+    const angle = (this.options.meteorAngle * Math.PI) / 180;
+
+    // Start from upper portion of screen
+    const startX = Math.random() * this.canvas.width * 0.7;
+    const startY = Math.random() * this.canvas.height * 0.3;
+
+    // Varying speeds: 40% slow, 40% medium, 20% fast
+    const speedType = Math.random();
+    let speed, tailLength, thickness, fadeRate;
+
+    if (speedType < 0.4) {
+      // Slow, graceful meteor - more visible, longer lasting
+      speed = 2 + Math.random() * 1.5;  // 2-3.5 (slower)
+      tailLength = 80;
+      thickness = 1.2;
+      fadeRate = 0.001;
+    } else if (speedType < 0.8) {
+      // Medium speed meteor
+      speed = 4 + Math.random() * 2;    // 4-6 (medium)
+      tailLength = 60;
+      thickness = 1;
+      fadeRate = 0.002;
+    } else {
+      // Fast streak meteor
+      speed = 8 + Math.random() * 4;    // 8-12 (fast but not too fast)
+      tailLength = 40;
+      thickness = 0.8;
+      fadeRate = 0.004;
+    }
+
     this.meteors.push({
       x: startX,
       y: startY,
-      vx: Math.sin(angle) * speed,  // Horizontal velocity
-      vy: Math.cos(angle) * speed,  // Vertical velocity
-      opacity: 1,                    // Fade out over time
-      tail: []                       // Trail effect
+      vx: Math.sin(angle) * speed,
+      vy: Math.cos(angle) * speed,
+      opacity: 1,
+      tail: [],
+      maxTailLength: tailLength,
+      thickness,
+      fadeRate,
+      speedType: speedType < 0.4 ? 'slow' : speedType < 0.8 ? 'medium' : 'fast',
     });
   }
 
   /**
-   * Bind window and canvas event listeners
+   * Bind event listeners
    */
   bindEvents() {
-    window.addEventListener('resize', () => this.resize());
+    this._resizeHandler = () => this.resize();
+    window.addEventListener('resize', this._resizeHandler);
   }
 
   /**
@@ -96,136 +192,140 @@ class ConstellationBackground {
   animate(currentTime = 0) {
     const { ctx, canvas, options, stars, meteors } = this;
 
-    // Clear canvas with black background
+    // Clear with pure black background
     ctx.fillStyle = options.backgroundColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // --- METEOR SPAWNING ---
-    // Create a new meteor at regular intervals
-    if (currentTime - this.lastMeteorTime > options.meteorInterval) {
+    // Spawn meteors occasionally
+    if (options.enableMeteors && currentTime - this.lastMeteorTime > options.meteorInterval) {
       this.createMeteor();
       this.lastMeteorTime = currentTime;
     }
 
-    // --- STARS ---
-    // Update and draw each star with blinking effect
-    stars.forEach((star, index) => {
-      // Calculate blinking brightness using sine wave
-      const time = currentTime * star.blinkSpeed + star.blinkOffset;
-      const blinkFactor = Math.sin(time) * 0.3 + 0.7; // Range: 0.4 to 1.0
-      const currentBrightness = star.brightness * blinkFactor;
+    // Render stars with twinkling
+    stars.forEach((star) => {
+      let currentBrightness = star.baseBrightness;
+      
+      // Apply twinkling effect if enabled
+      if (options.enableTwinkle) {
+        const twinkle = Math.sin(currentTime * star.twinkleSpeed + star.twinkleOffset);
+        currentBrightness = star.baseBrightness + twinkle * star.twinkleAmount * star.baseBrightness * options.twinkleIntensity;
+      }
 
-      // Draw the star
+      const { r, g, b } = star.color;
+      const alpha = Math.max(0.05, Math.min(1, currentBrightness));
+
+      // Draw glow for bright stars
+      if (star.hasGlow) {
+        const gradient = ctx.createRadialGradient(
+          star.x, star.y, 0,
+          star.x, star.y, star.radius * 4
+        );
+        gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${alpha * 0.6})`);
+        gradient.addColorStop(0.3, `rgba(${r}, ${g}, ${b}, ${alpha * 0.2})`);
+        gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.radius * 4, 0, Math.PI * 2);
+        ctx.fillStyle = gradient;
+        ctx.fill();
+      }
+
+      // Draw star core
       ctx.beginPath();
       ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255, 255, 255, ${currentBrightness})`;
+      ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
       ctx.fill();
     });
 
-    // --- STAR CONNECTIONS ---
-    // Draw lines between nearby stars
-    ctx.lineWidth = 0.5;
-    for (let i = 0; i < stars.length; i++) {
-      for (let j = i + 1; j < stars.length; j++) {
-        const s1 = stars[i];
-        const s2 = stars[j];
-        
-        // Calculate distance between stars
-        const dist = Math.hypot(s1.x - s2.x, s1.y - s2.y);
-        
-        // Only draw if stars are close enough
-        if (dist < options.maxDistance) {
-          // Fade line opacity based on distance
-          const opacity = (1 - dist / options.maxDistance) * 0.15;
-          ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
-          
-          ctx.beginPath();
-          ctx.moveTo(s1.x, s1.y);
-          ctx.lineTo(s2.x, s2.y);
-          ctx.stroke();
-        }
-      }
-    }
-
-    // --- METEORS ---
-    // Update and draw all active meteors
+    // Render meteors (shooting stars)
     for (let i = meteors.length - 1; i >= 0; i--) {
-      const meteor = meteors[i];
-      
-      // Update meteor position
-      meteor.x += meteor.vx;
-      meteor.y += meteor.vy;
-      meteor.opacity -= 0.005; // Gradual fade out
+      const m = meteors[i];
 
-      // Add current position to tail array
-      meteor.tail.unshift({ x: meteor.x, y: meteor.y });
-      if (meteor.tail.length > 20) {
-        meteor.tail.pop(); // Keep tail length limited
-      }
+      // Update position
+      m.x += m.vx;
+      m.y += m.vy;
+      m.opacity -= m.fadeRate;
 
-      // Remove meteor if it's off screen or fully faded
-      if (meteor.y > canvas.height + 100 || 
-          meteor.x > canvas.width + 100 || 
-          meteor.opacity <= 0) {
+      // Add to tail
+      m.tail.unshift({ x: m.x, y: m.y });
+      if (m.tail.length > m.maxTailLength) m.tail.pop();
+
+      // Remove if faded or off-screen
+      if (m.opacity <= 0 || m.x > canvas.width + 100 || m.y > canvas.height + 100) {
         meteors.splice(i, 1);
         continue;
       }
 
-      // --- METEOR TRAIL ---
-      // Draw gradient trail behind meteor
-      for (let j = 0; j < meteor.tail.length; j++) {
-        const point = meteor.tail[j];
-        const nextPoint = meteor.tail[j + 1];
-        if (!nextPoint) continue;
-
-        // Create gradient from white to blue
-        const gradient = ctx.createLinearGradient(
-          point.x, point.y,
-          nextPoint.x, nextPoint.y
-        );
-        
-        // Calculate fade based on position in tail
-        const opacity = meteor.opacity * (1 - j / meteor.tail.length);
-        gradient.addColorStop(0, `rgba(255, 255, 255, ${opacity * 0.8})`);
-        gradient.addColorStop(0.5, `rgba(200, 220, 255, ${opacity * 0.4})`);
-        gradient.addColorStop(1, `rgba(150, 180, 255, 0)`);
-
-        // Draw trail segment
-        ctx.strokeStyle = gradient;
-        ctx.lineWidth = 2 * (1 - j / meteor.tail.length);
+      // Draw meteor trail
+      if (m.tail.length > 1) {
         ctx.beginPath();
-        ctx.moveTo(point.x, point.y);
-        ctx.lineTo(nextPoint.x, nextPoint.y);
+        ctx.moveTo(m.tail[m.tail.length - 1].x, m.tail[m.tail.length - 1].y);
+
+        for (let j = m.tail.length - 2; j >= 0; j--) {
+          ctx.lineTo(m.tail[j].x, m.tail[j].y);
+        }
+
+        // Create gradient along the trail
+        const startPoint = m.tail[m.tail.length - 1];
+        const endPoint = m.tail[0];
+        const gradient = ctx.createLinearGradient(
+          startPoint.x, startPoint.y,
+          endPoint.x, endPoint.y
+        );
+        gradient.addColorStop(0, `rgba(255, 255, 255, 0)`);
+        gradient.addColorStop(0.3, `rgba(255, 255, 255, ${m.opacity * 0.3})`);
+        gradient.addColorStop(1, `rgba(255, 255, 255, ${m.opacity * 0.9})`);
+
+        ctx.strokeStyle = gradient;
+        ctx.lineWidth = m.thickness;
+        ctx.lineCap = 'round';
         ctx.stroke();
+
+        // Bright head
+        ctx.beginPath();
+        ctx.arc(m.x, m.y, m.thickness * 1.2, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${m.opacity})`;
+        ctx.fill();
       }
-
-      // --- METEOR HEAD ---
-      // Draw glowing head with radial gradient
-      const headGradient = ctx.createRadialGradient(
-        meteor.x, meteor.y, 0,
-        meteor.x, meteor.y, 4
-      );
-      headGradient.addColorStop(0, `rgba(255, 255, 255, ${meteor.opacity})`);
-      headGradient.addColorStop(0.5, `rgba(200, 220, 255, ${meteor.opacity * 0.5})`);
-      headGradient.addColorStop(1, 'rgba(150, 180, 255, 0)');
-
-      ctx.fillStyle = headGradient;
-      ctx.beginPath();
-      ctx.arc(meteor.x, meteor.y, 4, 0, Math.PI * 2);
-      ctx.fill();
     }
 
-    // Continue animation loop
-    this.animationId = requestAnimationFrame((time) => this.animate(time));
+    this.animationId = requestAnimationFrame((t) => this.animate(t));
   }
 
-
+  /**
+   * Destroy the starfield and cleanup
+   */
   destroy() {
     if (this.animationId) {
       cancelAnimationFrame(this.animationId);
+      this.animationId = null;
     }
-    window.removeEventListener('resize', () => this.resize());
+    if (this._resizeHandler) {
+      window.removeEventListener('resize', this._resizeHandler);
+    }
+  }
+
+  /**
+   * Update options dynamically
+   */
+  setOptions(newOptions) {
+    this.options = { ...this.options, ...newOptions };
+    if (newOptions.starCount) {
+      this.initStars();
+    }
+  }
+
+  /**
+   * Trigger a meteor manually
+   */
+  triggerMeteor() {
+    this.createMeteor();
   }
 }
 
-export default ConstellationBackground;
+// For backward compatibility, also export as ConstellationBackground
+const ConstellationBackground = RealisticStarfield;
+
+export default RealisticStarfield;
+export { RealisticStarfield, ConstellationBackground };

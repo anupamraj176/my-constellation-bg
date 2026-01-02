@@ -1,19 +1,34 @@
-# Constellation Background
+# Realistic Starfield Background
 
-A beautiful, performant animated constellation background with blinking stars, dynamic connections, and falling meteors. Perfect for creating engaging hero sections, landing pages, or any web interface that needs a touch of cosmic elegance.
+A beautiful, performant animated starfield background inspired by real night sky photography. Features dense stars with natural brightness distribution, subtle twinkling, and shooting stars with realistic varying speeds. Perfect for creating engaging hero sections, landing pages, or any web interface that needs a touch of cosmic elegance.
 
-![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 ## ✨ Features
 
-- 🌟 **Blinking Stars** - Smoothly animated stars with randomized blink patterns
-- 🔗 **Dynamic Connections** - Lines connect nearby stars, creating constellation patterns
-- ☄️ **Falling Meteors** - Periodic shooting stars with gradient trails
-- 🎨 **Fully Customizable** - Configure colors, counts, speeds, and more
-- 📱 **Responsive** - Automatically adapts to canvas/window size
+- 🌟 **Realistic Star Distribution** - 800+ stars with natural brightness (70% dim, 20% medium, 7% bright, 3% very bright with glow)
+- ✨ **Subtle Twinkling** - Configurable twinkling effect that's not overdone
+- 💫 **Bright Star Glow** - Very bright stars feature a beautiful radial glow effect
+- ☄️ **Varying Speed Meteors** - Shooting stars with slow (40%), medium (40%), and fast (20%) speeds
+- 🎨 **Star Color Variations** - Subtle white, warm white, cool blue, and yellow tints
+- 📱 **Responsive** - Automatically adapts to canvas/window size with consistent star density
 - ⚡ **Lightweight** - Pure vanilla JavaScript, no dependencies
 - 🎯 **Easy Integration** - Simple API, works with any framework
+- 🔧 **Backward Compatible** - Still exports `ConstellationBackground` for existing users
+
+## 🆕 What's New in v1.3.0
+
+- **Realistic Night Sky** - Inspired by actual star photography
+- **Natural Star Distribution** - Most stars are dim and tiny, few are bright (like real night sky)
+- **Slower Meteor Speeds** - More realistic shooting star speeds:
+  - Slow meteors (40%): Speed 2-3.5, long graceful trails
+  - Medium meteors (40%): Speed 4-6, balanced appearance
+  - Fast meteors (20%): Speed 8-12, quick streaks
+- **Pure Black Background** - Deep space black (#000000) by default
+- **No Constellation Lines** - Clean, realistic starfield appearance
+- **New Methods**: `setOptions()`, `triggerMeteor()` for dynamic control
+- **Test Suite** - Run `npm test` to verify installation
 
 ## 📦 Installation
 
@@ -21,15 +36,15 @@ A beautiful, performant animated constellation background with blinking stars, d
 npm install my-constellation-bg
 ```
 
-## 🔧 Build First
-
-Before using, build the package:
+## 🔧 Build & Test
 
 ```bash
+# Build the package
 npm run build
-```
 
-This creates the `dist/index.js` file.
+# Test the package (verify it works)
+npm test
+```
 
 ---
 
@@ -45,7 +60,7 @@ This creates the `dist/index.js` file.
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Constellation Background</title>
+    <title>Starfield Background</title>
     <style>
         * {
             margin: 0;
@@ -55,20 +70,17 @@ This creates the `dist/index.js` file.
 
         body {
             overflow: hidden;
-            font-family: Arial, sans-serif;
         }
 
-        /* Canvas fills entire viewport */
-        #constellation-canvas {
+        #starfield-canvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: -1; /* Behind other content */
+            z-index: -1;
         }
 
-        /* Your content goes on top */
         .content {
             position: relative;
             z-index: 1;
@@ -84,39 +96,40 @@ This creates the `dist/index.js` file.
             font-size: 4rem;
             margin-bottom: 1rem;
         }
-
-        p {
-            font-size: 1.5rem;
-        }
     </style>
 </head>
 <body>
-    <!-- Canvas element -->
-    <canvas id="constellation-canvas"></canvas>
+    <canvas id="starfield-canvas"></canvas>
 
-    <!-- Your content -->
     <div class="content">
         <h1>Welcome to My Site</h1>
-        <p>Beautiful constellation background ✨</p>
+        <p>Beautiful starfield background ✨</p>
     </div>
 
-    <!-- Include the script -->
     <script src="dist/index.js"></script>
     
-    <!-- Initialize -->
     <script>
-        const canvas = document.getElementById('constellation-canvas');
+        const canvas = document.getElementById('starfield-canvas');
         
-        // Create constellation with default settings
-        const constellation = new ConstellationBackground(canvas);
+        // Create starfield with default settings (recommended)
+        const starfield = new RealisticStarfield(canvas);
 
         // OR with custom options:
-        // const constellation = new ConstellationBackground(canvas, {
-        //     starCount: 300,
-        //     maxDistance: 150,
-        //     backgroundColor: '#0a0e27',
-        //     meteorInterval: 2000
+        // const starfield = new RealisticStarfield(canvas, {
+        //     starCount: 1000,              // More stars
+        //     backgroundColor: '#0a0a0a',   // Slightly lighter black
+        //     meteorInterval: 6000,         // Meteor every 6 seconds
+        //     meteorAngle: 40,              // Steeper angle
+        //     enableMeteors: true,          // Enable shooting stars
+        //     enableTwinkle: true,          // Enable twinkling
+        //     twinkleIntensity: 0.4         // Twinkle amount (0-1)
         // });
+
+        // Trigger a meteor manually (e.g., on button click)
+        // starfield.triggerMeteor();
+
+        // Update options dynamically
+        // starfield.setOptions({ meteorInterval: 3000 });
     </script>
 </body>
 </html>
@@ -131,16 +144,18 @@ This creates the `dist/index.js` file.
     <!-- Same styles as above -->
 </head>
 <body>
-    <canvas id="constellation-canvas"></canvas>
+    <canvas id="starfield-canvas"></canvas>
     <div class="content">
         <h1>Welcome</h1>
     </div>
 
     <script type="module">
-        import ConstellationBackground from './src/index.js';
+        import RealisticStarfield from './src/index.js';
+        // OR for backward compatibility:
+        // import { ConstellationBackground } from './src/index.js';
         
-        const canvas = document.getElementById('constellation-canvas');
-        const constellation = new ConstellationBackground(canvas);
+        const canvas = document.getElementById('starfield-canvas');
+        const starfield = new RealisticStarfield(canvas);
     </script>
 </body>
 </html>
@@ -154,35 +169,29 @@ This creates the `dist/index.js` file.
 
 ```jsx
 import React, { useEffect, useRef } from 'react';
-import ConstellationBackground from 'my-constellation-bg';
-// OR if using locally:
-// import ConstellationBackground from './path/to/src/index.js';
+import RealisticStarfield from 'my-constellation-bg';
 
 function App() {
   const canvasRef = useRef(null);
-  const constellationRef = useRef(null);
+  const starfieldRef = useRef(null);
 
   useEffect(() => {
     if (canvasRef.current) {
-      // Initialize constellation
-      constellationRef.current = new ConstellationBackground(canvasRef.current, {
-        starCount: 250,
-        maxDistance: 120,
-        meteorInterval: 3000
+      starfieldRef.current = new RealisticStarfield(canvasRef.current, {
+        starCount: 800,
+        meteorInterval: 8000
       });
     }
 
-    // Cleanup on unmount
     return () => {
-      if (constellationRef.current) {
-        constellationRef.current.destroy();
+      if (starfieldRef.current) {
+        starfieldRef.current.destroy();
       }
     };
   }, []);
 
   return (
     <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
-      {/* Canvas background */}
       <canvas
         ref={canvasRef}
         style={{
@@ -195,7 +204,6 @@ function App() {
         }}
       />
       
-      {/* Your content */}
       <div style={{
         position: 'relative',
         zIndex: 1,
@@ -219,26 +227,26 @@ export default App;
 #### Reusable Component
 
 ```jsx
-// ConstellationCanvas.jsx
+// StarfieldCanvas.jsx
 import React, { useEffect, useRef } from 'react';
-import ConstellationBackground from 'my-constellation-bg';
+import RealisticStarfield from 'my-constellation-bg';
 
-const ConstellationCanvas = ({ options = {} }) => {
+const StarfieldCanvas = ({ options = {} }) => {
   const canvasRef = useRef(null);
-  const constellationRef = useRef(null);
+  const starfieldRef = useRef(null);
 
   useEffect(() => {
-    if (canvasRef.current && !constellationRef.current) {
-      constellationRef.current = new ConstellationBackground(
+    if (canvasRef.current && !starfieldRef.current) {
+      starfieldRef.current = new RealisticStarfield(
         canvasRef.current,
         options
       );
     }
 
     return () => {
-      if (constellationRef.current) {
-        constellationRef.current.destroy();
-        constellationRef.current = null;
+      if (starfieldRef.current) {
+        starfieldRef.current.destroy();
+        starfieldRef.current = null;
       }
     };
   }, [options]);
@@ -258,21 +266,21 @@ const ConstellationCanvas = ({ options = {} }) => {
   );
 };
 
-export default ConstellationCanvas;
+export default StarfieldCanvas;
 ```
 
 **Usage:**
 
 ```jsx
-import ConstellationCanvas from './ConstellationCanvas';
+import StarfieldCanvas from './StarfieldCanvas';
 
 function App() {
   return (
     <>
-      <ConstellationCanvas 
+      <StarfieldCanvas 
         options={{
-          starCount: 300,
-          meteorInterval: 2000
+          starCount: 1000,
+          meteorInterval: 5000
         }}
       />
       <div className="content">
@@ -292,7 +300,7 @@ function App() {
 ```vue
 <template>
   <div class="container">
-    <canvas ref="canvasRef" class="constellation-canvas"></canvas>
+    <canvas ref="canvasRef" class="starfield-canvas"></canvas>
     <div class="content">
       <h1>Welcome to Vue App</h1>
       <p>Powered by Vue 3 🟢</p>
@@ -302,24 +310,23 @@ function App() {
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
-import ConstellationBackground from 'my-constellation-bg';
+import RealisticStarfield from 'my-constellation-bg';
 
 const canvasRef = ref(null);
-let constellation = null;
+let starfield = null;
 
 onMounted(() => {
   if (canvasRef.value) {
-    constellation = new ConstellationBackground(canvasRef.value, {
-      starCount: 250,
-      maxDistance: 120,
-      meteorInterval: 3000
+    starfield = new RealisticStarfield(canvasRef.value, {
+      starCount: 800,
+      meteorInterval: 8000
     });
   }
 });
 
 onBeforeUnmount(() => {
-  if (constellation) {
-    constellation.destroy();
+  if (starfield) {
+    starfield.destroy();
   }
 });
 </script>
@@ -331,7 +338,7 @@ onBeforeUnmount(() => {
   height: 100vh;
 }
 
-.constellation-canvas {
+.starfield-canvas {
   position: fixed;
   top: 0;
   left: 0;
@@ -363,7 +370,7 @@ h1 {
 ```vue
 <template>
   <div class="container">
-    <canvas ref="canvas" class="constellation-canvas"></canvas>
+    <canvas ref="canvas" class="starfield-canvas"></canvas>
     <div class="content">
       <h1>Your Content</h1>
     </div>
@@ -371,23 +378,23 @@ h1 {
 </template>
 
 <script>
-import ConstellationBackground from 'my-constellation-bg';
+import RealisticStarfield from 'my-constellation-bg';
 
 export default {
   data() {
     return {
-      constellation: null
+      starfield: null
     };
   },
   mounted() {
-    this.constellation = new ConstellationBackground(this.$refs.canvas, {
-      starCount: 200,
-      meteorInterval: 3000
+    this.starfield = new RealisticStarfield(this.$refs.canvas, {
+      starCount: 800,
+      meteorInterval: 8000
     });
   },
   beforeUnmount() {
-    if (this.constellation) {
-      this.constellation.destroy();
+    if (this.starfield) {
+      this.starfield.destroy();
     }
   }
 };
@@ -400,7 +407,7 @@ export default {
   height: 100vh;
 }
 
-.constellation-canvas {
+.starfield-canvas {
   position: fixed;
   top: 0;
   left: 0;
@@ -429,13 +436,14 @@ export default {
 Customize the appearance and behavior:
 
 ```javascript
-const constellation = new ConstellationBackground(canvas, {
-  starCount: 200,                           // Number of stars
-  maxDistance: 120,                         // Max distance for connections
-  backgroundColor: '#000000',               // Canvas background
-  starColor: '#ffffff',                     // Star color
-  lineColor: 'rgba(255, 255, 255, 0.15)',  // Connection line color
-  meteorInterval: 3000                      // Time between meteors (ms)
+const starfield = new RealisticStarfield(canvas, {
+  starCount: 800,                 // Number of stars (scales with screen size)
+  backgroundColor: '#000000',     // Pure black deep space
+  meteorInterval: 8000,           // Time between meteors (ms)
+  meteorAngle: 35,                // Meteor angle in degrees
+  enableMeteors: true,            // Enable/disable shooting stars
+  enableTwinkle: true,            // Enable/disable star twinkling
+  twinkleIntensity: 0.3           // Twinkle strength (0-1)
 });
 ```
 
@@ -443,45 +451,65 @@ const constellation = new ConstellationBackground(canvas, {
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `starCount` | Number | `200` | Number of stars to render |
-| `maxDistance` | Number | `120` | Maximum distance for star connections (pixels) |
-| `backgroundColor` | String | `'#000000'` | Canvas background color |
-| `starColor` | String | `'#ffffff'` | Base color for stars |
-| `lineColor` | String | `'rgba(255, 255, 255, 0.15)'` | Color for connection lines |
-| `meteorInterval` | Number | `3000` | Time between meteor spawns (milliseconds) |
+| `starCount` | Number | `800` | Base number of stars (auto-scales with screen size) |
+| `backgroundColor` | String | `'#000000'` | Canvas background color (pure black recommended) |
+| `meteorInterval` | Number | `8000` | Time between meteor spawns (milliseconds) |
+| `meteorAngle` | Number | `35` | Fixed angle for meteors in degrees (from vertical) |
+| `enableMeteors` | Boolean | `true` | Enable or disable shooting stars |
+| `enableTwinkle` | Boolean | `true` | Enable or disable star twinkling effect |
+| `twinkleIntensity` | Number | `0.3` | How much stars twinkle (0 = none, 1 = maximum) |
+
+### Meteor Speed Distribution
+
+Meteors spawn with varying speeds for a realistic effect:
+- **40% Slow Meteors** - Graceful, long trails (speed: 2-3.5)
+- **40% Medium Meteors** - Balanced appearance (speed: 4-6)
+- **20% Fast Meteors** - Quick bright streaks (speed: 8-12)
+
+### Star Brightness Distribution
+
+Stars are distributed with realistic brightness levels:
+- **70% Dim Stars** - Tiny, faint (like distant stars)
+- **20% Medium Stars** - Moderate brightness
+- **7% Bright Stars** - Clearly visible
+- **3% Very Bright Stars** - With glow effect
 
 ---
 
 ## 🎨 Styling Examples
 
-### Dark Theme with Blue Accents
+### Default Realistic Night Sky
 
 ```javascript
-new ConstellationBackground(canvas, {
-  backgroundColor: '#0a0e27',
-  starColor: '#7ec8e3',
-  lineColor: 'rgba(126, 200, 227, 0.2)',
-  meteorInterval: 2000
+// Just use defaults - they look like a real photo!
+new RealisticStarfield(canvas);
+```
+
+### Dense Starfield
+
+```javascript
+new RealisticStarfield(canvas, {
+  starCount: 1500,        // More stars
+  meteorInterval: 5000    // More frequent meteors
 });
 ```
 
-### Minimal Stars
+### Subtle Background (Less Distracting)
 
 ```javascript
-new ConstellationBackground(canvas, {
-  starCount: 50,
-  maxDistance: 200,
-  meteorInterval: 5000
+new RealisticStarfield(canvas, {
+  starCount: 400,         // Fewer stars
+  meteorInterval: 15000,  // Rare meteors
+  twinkleIntensity: 0.2   // Very subtle twinkle
 });
 ```
 
-### Dense Constellation
+### No Meteors (Static Starfield)
 
 ```javascript
-new ConstellationBackground(canvas, {
-  starCount: 400,
-  maxDistance: 80,
-  meteorInterval: 1500
+new RealisticStarfield(canvas, {
+  enableMeteors: false,   // Disable shooting stars
+  enableTwinkle: true     // Keep twinkling
 });
 ```
 
@@ -522,7 +550,7 @@ new ConstellationBackground(canvas, {
 <script src="dist/index.js"></script>
 <script>
     const canvas = document.getElementById('hero-canvas');
-    new ConstellationBackground(canvas);
+    new RealisticStarfield(canvas);
 </script>
 ```
 
@@ -563,7 +591,7 @@ new ConstellationBackground(canvas, {
 <script src="dist/index.js"></script>
 <script>
     const canvas = document.getElementById('bg-canvas');
-    new ConstellationBackground(canvas);
+    new RealisticStarfield(canvas);
 </script>
 ```
 
@@ -574,16 +602,18 @@ new ConstellationBackground(canvas, {
 ### Constructor
 
 ```javascript
+new RealisticStarfield(canvas, options)
+// OR for backward compatibility:
 new ConstellationBackground(canvas, options)
 ```
 
-Creates a new constellation background instance.
+Creates a new starfield instance.
 
 **Parameters:**
 - `canvas` (HTMLCanvasElement) - The canvas element to render on
 - `options` (Object, optional) - Configuration object
 
-**Returns:** ConstellationBackground instance
+**Returns:** RealisticStarfield instance
 
 ### Methods
 
@@ -592,7 +622,23 @@ Creates a new constellation background instance.
 Stops the animation and cleans up event listeners. Always call this when removing the canvas (especially in SPAs).
 
 ```javascript
-constellation.destroy();
+starfield.destroy();
+```
+
+#### `setOptions(options)`
+
+Update options dynamically without recreating the instance.
+
+```javascript
+starfield.setOptions({ meteorInterval: 5000 });
+```
+
+#### `triggerMeteor()`
+
+Manually trigger a shooting star (e.g., on button click or event).
+
+```javascript
+starfield.triggerMeteor();
 ```
 
 #### `resize()`
@@ -600,7 +646,7 @@ constellation.destroy();
 Manually trigger a resize. Usually called automatically on window resize.
 
 ```javascript
-constellation.resize();
+starfield.resize();
 ```
 
 ---
@@ -612,7 +658,9 @@ my-constellation-bg/
 ├── dist/
 │   └── index.js          # Built file (after npm run build)
 ├── src/
-│   └── index.js          # Source file (ConstellationBackground class)
+│   └── index.js          # Source file (RealisticStarfield class)
+├── test.js               # Test suite
+├── index.html            # Demo page
 ├── package.json
 └── README.md
 ```
@@ -653,7 +701,26 @@ Tested on: Chrome, Firefox, Safari, Edge
 
 ---
 
-## 📄 License
+## � Changelog
+
+### v1.2.0 (2026-01-02)
+**Major Update - Grok-style Improvements**
+- ✨ **Fixed Position Stars**: Stars now have anchor positions with subtle drift movement
+- ☄️ **Variable Speed Meteors**: Added slow (30%), medium (50%), and fast (20%) meteor types
+- 💫 **Bright Star Glow**: 15% of stars now feature a special radial glow effect
+- 🎨 **Enhanced Meteor Colors**: Different meteor speeds have unique color schemes
+- ⚙️ **New Options**: Added `starDrift` and `driftSpeed` configuration options
+- 🐛 **Performance**: Optimized animation loop for smoother rendering
+
+### v1.1.3
+- Bug fixes and stability improvements
+
+### v1.1.0
+- Initial public release with blinking stars, connections, and meteors
+
+---
+
+## �📄 License
 
 MIT © Anupam Raj
 
