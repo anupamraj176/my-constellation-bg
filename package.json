@@ -25,7 +25,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/anupamraj176/my-constellation-bg"
+    "url": "git+https://github.com/anupamraj176/my-constellation-bg.git"
   },
   "homepage": "https://github.com/anupamraj176/my-constellation-bg#readme",
   "bugs": {
