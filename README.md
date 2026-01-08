@@ -1,8 +1,8 @@
 # Realistic Starfield Background
 
-A beautiful, performant animated starfield background inspired by real night sky photography. Features dense stars with natural brightness distribution, subtle twinkling, and shooting stars with realistic varying speeds. Perfect for creating engaging hero sections, landing pages, or any web interface that needs a touch of cosmic elegance.
+A beautiful, performant animated starfield background inspired by real night sky photography. Features dense stars with natural brightness distribution, subtle twinkling, shooting stars with realistic varying speeds, parallax effects, and optional nebula clouds. Perfect for creating engaging hero sections, landing pages, or any web interface that needs a touch of cosmic elegance.
 
-![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.4.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 ## ✨ Features
@@ -12,23 +12,58 @@ A beautiful, performant animated starfield background inspired by real night sky
 - 💫 **Bright Star Glow** - Very bright stars feature a beautiful radial glow effect
 - ☄️ **Varying Speed Meteors** - Shooting stars with slow (40%), medium (40%), and fast (20%) speeds
 - 🎨 **Star Color Variations** - Subtle white, warm white, cool blue, and yellow tints
+- 🔄 **Parallax Effect** - Mouse movement creates 3D depth illusion (NEW in v1.4.0)
+- 🌌 **Nebula Clouds** - Optional atmospheric nebula clouds for extra depth (NEW in v1.4.0)
+- 💫 **Pulsating Stars** - Bright stars gently pulse for added realism (NEW in v1.4.0)
+- ⏸️ **Pause/Resume** - Control animation playback (NEW in v1.4.0)
 - 📱 **Responsive** - Automatically adapts to canvas/window size with consistent star density
 - ⚡ **Lightweight** - Pure vanilla JavaScript, no dependencies
 - 🎯 **Easy Integration** - Simple API, works with any framework
 - 🔧 **Backward Compatible** - Still exports `ConstellationBackground` for existing users
 
-## 🆕 What's New in v1.3.0
+## 🆕 What's New in v1.4.0
 
-- **Realistic Night Sky** - Inspired by actual star photography
-- **Natural Star Distribution** - Most stars are dim and tiny, few are bright (like real night sky)
-- **Slower Meteor Speeds** - More realistic shooting star speeds:
-  - Slow meteors (40%): Speed 2-3.5, long graceful trails
-  - Medium meteors (40%): Speed 4-6, balanced appearance
-  - Fast meteors (20%): Speed 8-12, quick streaks
-- **Pure Black Background** - Deep space black (#000000) by default
-- **No Constellation Lines** - Clean, realistic starfield appearance
-- **New Methods**: `setOptions()`, `triggerMeteor()` for dynamic control
-- **Test Suite** - Run `npm test` to verify installation
+- **Parallax Effect** - Move your mouse to see stars shift with depth perception
+- **Nebula Clouds** - Optional colorful nebula clouds that drift slowly in the background
+- **Pulsating Stars** - Bright stars now gently pulse for more realistic appearance
+- **Pause/Resume** - New methods to control animation: `pause()`, `resume()`, `togglePause()`
+- **Paused Getter** - Check animation state with the `paused` property
+- **Static Version** - Access version via `RealisticStarfield.version`
+- **Improved Performance** - Smoother parallax interpolation
+- **Enhanced Options** - New configuration options for all new features
+- **TypeScript Definitions** - Type definitions included in dist
+
+### New Options in v1.4.0
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `enableParallax` | boolean | `true` | Enable parallax effect on mouse movement |
+| `parallaxStrength` | number | `0.02` | Strength of parallax effect (0-1) |
+| `enableNebula` | boolean | `false` | Enable nebula cloud background |
+| `nebulaOpacity` | number | `0.15` | Opacity of nebula clouds (0-1) |
+| `nebulaColors` | array | `['#4a0080', '#000066', '#003366']` | Colors for nebula clouds |
+| `enablePulsate` | boolean | `true` | Enable pulsating effect on bright stars |
+
+### New Methods in v1.4.0
+
+```javascript
+// Pause the animation
+starfield.pause();
+
+// Resume the animation
+starfield.resume();
+
+// Toggle pause/resume (returns new pause state)
+const isPaused = starfield.togglePause();
+
+// Check if paused
+if (starfield.paused) {
+  console.log('Animation is paused');
+}
+
+// Get version
+console.log(RealisticStarfield.version); // "1.4.0"
+```
 
 ## 📦 Installation
 
@@ -114,7 +149,7 @@ npm test
         // Create starfield with default settings (recommended)
         const starfield = new RealisticStarfield(canvas);
 
-        // OR with custom options:
+        // OR with custom options (v1.4.0):
         // const starfield = new RealisticStarfield(canvas, {
         //     starCount: 1000,              // More stars
         //     backgroundColor: '#0a0a0a',   // Slightly lighter black
@@ -122,7 +157,12 @@ npm test
         //     meteorAngle: 40,              // Steeper angle
         //     enableMeteors: true,          // Enable shooting stars
         //     enableTwinkle: true,          // Enable twinkling
-        //     twinkleIntensity: 0.4         // Twinkle amount (0-1)
+        //     twinkleIntensity: 0.4,        // Twinkle amount (0-1)
+        //     enableParallax: true,         // Enable parallax effect
+        //     parallaxStrength: 0.03,       // Parallax intensity
+        //     enableNebula: true,           // Enable nebula clouds
+        //     nebulaOpacity: 0.2,           // Nebula visibility
+        //     enablePulsate: true           // Pulsating bright stars
         // });
 
         // Trigger a meteor manually (e.g., on button click)
@@ -130,6 +170,11 @@ npm test
 
         // Update options dynamically
         // starfield.setOptions({ meteorInterval: 3000 });
+
+        // Pause/resume controls
+        // starfield.pause();
+        // starfield.resume();
+        // starfield.togglePause();
     </script>
 </body>
 </html>

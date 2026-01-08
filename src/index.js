@@ -1,12 +1,15 @@
 /**
- * RealisticStarfield
+ * RealisticStarfield v1.4.0
  * Creates a realistic night sky background inspired by actual star photography
  * Features:
  * - Dense starfield with natural brightness distribution
  * - Subtle twinkling animation
  * - Shooting stars with varying speeds (slow, medium, fast)
  * - Pure black deep space background
- * - No constellation lines for realistic appearance
+ * - Parallax effect on mouse movement
+ * - Nebula clouds for atmospheric depth
+ * - Pause/Resume functionality
+ * - Improved performance with optimizations
  */
 class RealisticStarfield {
   constructor(canvas, options = {}) {
@@ -29,13 +32,31 @@ class RealisticStarfield {
       enableTwinkle: true,
       // Twinkle intensity (0-1)
       twinkleIntensity: 0.3,
+      // NEW v1.4.0: Parallax effect on mouse movement
+      enableParallax: true,
+      // Parallax strength (0-1)
+      parallaxStrength: 0.02,
+      // NEW v1.4.0: Nebula clouds
+      enableNebula: false,
+      // Nebula opacity (0-1)
+      nebulaOpacity: 0.15,
+      // Nebula colors
+      nebulaColors: ['#4a0080', '#000066', '#003366'],
+      // NEW v1.4.0: Pulsating bright stars
+      enablePulsate: true,
       ...options,
     };
 
     this.stars = [];
     this.meteors = [];
+    this.nebulaClouds = [];
     this.lastMeteorTime = 0;
     this.animationId = null;
+    this.isPaused = false;
+    this.mouseX = 0;
+    this.mouseY = 0;
+    this.targetMouseX = 0;
+    this.targetMouseY = 0;
 
     this.init();
   }
@@ -56,6 +77,31 @@ class RealisticStarfield {
     this.canvas.width = this.canvas.offsetWidth || window.innerWidth;
     this.canvas.height = this.canvas.offsetHeight || window.innerHeight;
     this.initStars();
+    if (this.options.enableNebula) {
+      this.initNebulaClouds();
+    }
+  }
+
+  /**
+   * Initialize nebula clouds for atmospheric depth
+   */
+  initNebulaClouds() {
+    this.nebulaClouds = [];
+    const cloudCount = 3 + Math.floor(Math.random() * 3);
+    
+    for (let i = 0; i < cloudCount; i++) {
+      this.nebulaClouds.push({
+        x: Math.random() * this.canvas.width,
+        y: Math.random() * this.canvas.height,
+        radius: 100 + Math.random() * 200,
+        color: this.options.nebulaColors[Math.floor(Math.random() * this.options.nebulaColors.length)],
+        opacity: 0.05 + Math.random() * this.options.nebulaOpacity,
+        drift: {
+          x: (Math.random() - 0.5) * 0.1,
+          y: (Math.random() - 0.5) * 0.1
+        }
+      });
+    }
   }
 
   /**
@@ -184,17 +230,42 @@ class RealisticStarfield {
   bindEvents() {
     this._resizeHandler = () => this.resize();
     window.addEventListener('resize', this._resizeHandler);
+    
+    // Parallax mouse tracking
+    if (this.options.enableParallax) {
+      this._mouseMoveHandler = (e) => {
+        this.targetMouseX = (e.clientX - this.canvas.width / 2) * this.options.parallaxStrength;
+        this.targetMouseY = (e.clientY - this.canvas.height / 2) * this.options.parallaxStrength;
+      };
+      window.addEventListener('mousemove', this._mouseMoveHandler);
+    }
   }
 
   /**
    * Main animation loop
    */
   animate(currentTime = 0) {
+    if (this.isPaused) {
+      this.animationId = requestAnimationFrame((t) => this.animate(t));
+      return;
+    }
+
     const { ctx, canvas, options, stars, meteors } = this;
+
+    // Smooth parallax interpolation
+    if (options.enableParallax) {
+      this.mouseX += (this.targetMouseX - this.mouseX) * 0.05;
+      this.mouseY += (this.targetMouseY - this.mouseY) * 0.05;
+    }
 
     // Clear with pure black background
     ctx.fillStyle = options.backgroundColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Render nebula clouds (behind stars)
+    if (options.enableNebula && this.nebulaClouds.length > 0) {
+      this.renderNebula(ctx);
+    }
 
     // Spawn meteors occasionally
     if (options.enableMeteors && currentTime - this.lastMeteorTime > options.meteorInterval) {
@@ -202,7 +273,7 @@ class RealisticStarfield {
       this.lastMeteorTime = currentTime;
     }
 
-    // Render stars with twinkling
+    // Render stars with twinkling and parallax
     stars.forEach((star) => {
       let currentBrightness = star.baseBrightness;
       
@@ -212,28 +283,42 @@ class RealisticStarfield {
         currentBrightness = star.baseBrightness + twinkle * star.twinkleAmount * star.baseBrightness * options.twinkleIntensity;
       }
 
+      // Apply pulsating effect to bright stars
+      let currentRadius = star.radius;
+      if (options.enablePulsate && star.hasGlow) {
+        const pulse = Math.sin(currentTime * 0.001 + star.twinkleOffset) * 0.2 + 1;
+        currentRadius *= pulse;
+      }
+
       const { r, g, b } = star.color;
       const alpha = Math.max(0.05, Math.min(1, currentBrightness));
+
+      // Calculate parallax offset based on star depth (radius)
+      const parallaxFactor = options.enableParallax ? (star.radius / 2) : 0;
+      const offsetX = this.mouseX * parallaxFactor;
+      const offsetY = this.mouseY * parallaxFactor;
+      const drawX = star.x + offsetX;
+      const drawY = star.y + offsetY;
 
       // Draw glow for bright stars
       if (star.hasGlow) {
         const gradient = ctx.createRadialGradient(
-          star.x, star.y, 0,
-          star.x, star.y, star.radius * 4
+          drawX, drawY, 0,
+          drawX, drawY, currentRadius * 4
         );
         gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${alpha * 0.6})`);
         gradient.addColorStop(0.3, `rgba(${r}, ${g}, ${b}, ${alpha * 0.2})`);
         gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
 
         ctx.beginPath();
-        ctx.arc(star.x, star.y, star.radius * 4, 0, Math.PI * 2);
+        ctx.arc(drawX, drawY, currentRadius * 4, 0, Math.PI * 2);
         ctx.fillStyle = gradient;
         ctx.fill();
       }
 
       // Draw star core
       ctx.beginPath();
-      ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+      ctx.arc(drawX, drawY, currentRadius, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
       ctx.fill();
     });
@@ -294,6 +379,37 @@ class RealisticStarfield {
   }
 
   /**
+   * Render nebula clouds
+   */
+  renderNebula(ctx) {
+    this.nebulaClouds.forEach((cloud) => {
+      // Update cloud position with drift
+      cloud.x += cloud.drift.x;
+      cloud.y += cloud.drift.y;
+
+      // Wrap around screen
+      if (cloud.x < -cloud.radius) cloud.x = this.canvas.width + cloud.radius;
+      if (cloud.x > this.canvas.width + cloud.radius) cloud.x = -cloud.radius;
+      if (cloud.y < -cloud.radius) cloud.y = this.canvas.height + cloud.radius;
+      if (cloud.y > this.canvas.height + cloud.radius) cloud.y = -cloud.radius;
+
+      // Draw nebula cloud
+      const gradient = ctx.createRadialGradient(
+        cloud.x, cloud.y, 0,
+        cloud.x, cloud.y, cloud.radius
+      );
+      gradient.addColorStop(0, cloud.color + Math.floor(cloud.opacity * 255).toString(16).padStart(2, '0'));
+      gradient.addColorStop(0.5, cloud.color + Math.floor(cloud.opacity * 0.5 * 255).toString(16).padStart(2, '0'));
+      gradient.addColorStop(1, cloud.color + '00');
+
+      ctx.beginPath();
+      ctx.arc(cloud.x, cloud.y, cloud.radius, 0, Math.PI * 2);
+      ctx.fillStyle = gradient;
+      ctx.fill();
+    });
+  }
+
+  /**
    * Destroy the starfield and cleanup
    */
   destroy() {
@@ -304,6 +420,38 @@ class RealisticStarfield {
     if (this._resizeHandler) {
       window.removeEventListener('resize', this._resizeHandler);
     }
+    if (this._mouseMoveHandler) {
+      window.removeEventListener('mousemove', this._mouseMoveHandler);
+    }
+  }
+
+  /**
+   * Pause the animation
+   */
+  pause() {
+    this.isPaused = true;
+  }
+
+  /**
+   * Resume the animation
+   */
+  resume() {
+    this.isPaused = false;
+  }
+
+  /**
+   * Toggle pause/resume
+   */
+  togglePause() {
+    this.isPaused = !this.isPaused;
+    return this.isPaused;
+  }
+
+  /**
+   * Check if animation is paused
+   */
+  get paused() {
+    return this.isPaused;
   }
 
   /**
@@ -314,6 +462,9 @@ class RealisticStarfield {
     if (newOptions.starCount) {
       this.initStars();
     }
+    if (newOptions.enableNebula && this.nebulaClouds.length === 0) {
+      this.initNebulaClouds();
+    }
   }
 
   /**
@@ -321,6 +472,13 @@ class RealisticStarfield {
    */
   triggerMeteor() {
     this.createMeteor();
+  }
+
+  /**
+   * Get current version
+   */
+  static get version() {
+    return '1.4.0';
   }
 }
 

@@ -1,11 +1,12 @@
 /**
  * Test script to verify the package works correctly after installation
  * Run with: npm test
+ * Version: 1.4.0
  */
 
 import RealisticStarfield, { ConstellationBackground } from './src/index.js';
 
-console.log('🧪 Testing my-constellation-bg package...\n');
+console.log('🧪 Testing my-constellation-bg package v1.4.0...\n');
 
 let passed = 0;
 let failed = 0;
@@ -81,6 +82,10 @@ test('RealisticStarfield and ConstellationBackground are the same class', () => 
   assert(RealisticStarfield === ConstellationBackground, 'Should be identical');
 });
 
+test('Version is 1.4.0', () => {
+  assert(RealisticStarfield.version === '1.4.0', 'Version should be 1.4.0');
+});
+
 console.log('\n--- Instance Creation Tests ---');
 
 test('Can create instance with default options', () => {
@@ -97,10 +102,15 @@ test('Can create instance with custom options', () => {
     meteorAngle: 45,
     enableMeteors: true,
     enableTwinkle: true,
-    twinkleIntensity: 0.5
+    twinkleIntensity: 0.5,
+    enableParallax: true,
+    enableNebula: true,
+    enablePulsate: true
   });
   assert(instance.options.starCount === 500, 'starCount should be 500');
   assert(instance.options.meteorAngle === 45, 'meteorAngle should be 45');
+  assert(instance.options.enableParallax === true, 'enableParallax should be true');
+  assert(instance.options.enableNebula === true, 'enableNebula should be true');
   instance.destroy();
 });
 
@@ -127,6 +137,32 @@ test('Default meteorInterval is 8000ms', () => {
 test('Default meteorAngle is 35 degrees', () => {
   const instance = new RealisticStarfield(mockCanvas);
   assert(instance.options.meteorAngle === 35, 'Default meteorAngle should be 35');
+  instance.destroy();
+});
+
+console.log('\n--- New v1.4.0 Default Options Tests ---');
+
+test('Default enableParallax is true', () => {
+  const instance = new RealisticStarfield(mockCanvas);
+  assert(instance.options.enableParallax === true, 'Default enableParallax should be true');
+  instance.destroy();
+});
+
+test('Default enableNebula is false', () => {
+  const instance = new RealisticStarfield(mockCanvas);
+  assert(instance.options.enableNebula === false, 'Default enableNebula should be false');
+  instance.destroy();
+});
+
+test('Default enablePulsate is true', () => {
+  const instance = new RealisticStarfield(mockCanvas);
+  assert(instance.options.enablePulsate === true, 'Default enablePulsate should be true');
+  instance.destroy();
+});
+
+test('Default parallaxStrength is 0.02', () => {
+  const instance = new RealisticStarfield(mockCanvas);
+  assert(instance.options.parallaxStrength === 0.02, 'Default parallaxStrength should be 0.02');
   instance.destroy();
 });
 
@@ -173,6 +209,70 @@ test('triggerMeteor() method exists and creates meteor', () => {
   const initialCount = instance.meteors.length;
   instance.triggerMeteor();
   assert(instance.meteors.length === initialCount + 1, 'Should have one more meteor');
+  instance.destroy();
+});
+
+console.log('\n--- New v1.4.0 Method Tests ---');
+
+test('pause() method exists and works', () => {
+  const instance = new RealisticStarfield(mockCanvas);
+  assert(typeof instance.pause === 'function', 'pause should be a function');
+  instance.pause();
+  assert(instance.isPaused === true, 'isPaused should be true after pause()');
+  instance.destroy();
+});
+
+test('resume() method exists and works', () => {
+  const instance = new RealisticStarfield(mockCanvas);
+  assert(typeof instance.resume === 'function', 'resume should be a function');
+  instance.pause();
+  instance.resume();
+  assert(instance.isPaused === false, 'isPaused should be false after resume()');
+  instance.destroy();
+});
+
+test('togglePause() method exists and works', () => {
+  const instance = new RealisticStarfield(mockCanvas);
+  assert(typeof instance.togglePause === 'function', 'togglePause should be a function');
+  const result1 = instance.togglePause();
+  assert(result1 === true, 'First toggle should return true');
+  const result2 = instance.togglePause();
+  assert(result2 === false, 'Second toggle should return false');
+  instance.destroy();
+});
+
+test('paused getter exists and works', () => {
+  const instance = new RealisticStarfield(mockCanvas);
+  assert(instance.paused === false, 'paused should be false initially');
+  instance.pause();
+  assert(instance.paused === true, 'paused should be true after pause()');
+  instance.destroy();
+});
+
+test('Static version property exists', () => {
+  assert(typeof RealisticStarfield.version === 'string', 'version should be a string');
+  assert(RealisticStarfield.version === '1.4.0', 'version should be 1.4.0');
+});
+
+console.log('\n--- Nebula Tests ---');
+
+test('Nebula clouds are created when enableNebula is true', () => {
+  const instance = new RealisticStarfield(mockCanvas, { enableNebula: true });
+  assert(instance.nebulaClouds.length > 0, 'Should have nebula clouds');
+  instance.destroy();
+});
+
+test('Nebula clouds are not created by default', () => {
+  const instance = new RealisticStarfield(mockCanvas);
+  assert(instance.nebulaClouds.length === 0, 'Should not have nebula clouds by default');
+  instance.destroy();
+});
+
+test('setOptions can enable nebula dynamically', () => {
+  const instance = new RealisticStarfield(mockCanvas);
+  assert(instance.nebulaClouds.length === 0, 'Should not have nebula clouds initially');
+  instance.setOptions({ enableNebula: true });
+  assert(instance.nebulaClouds.length > 0, 'Should have nebula clouds after enabling');
   instance.destroy();
 });
 
