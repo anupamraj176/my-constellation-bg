@@ -1,68 +1,87 @@
-# Realistic Starfield Background
+# 🌌 CosmicCanvas (my-constellation-bg)
 
-A beautiful, performant animated starfield background inspired by real night sky photography. Features dense stars with natural brightness distribution, subtle twinkling, shooting stars with realistic varying speeds, parallax effects, and optional nebula clouds. Perfect for creating engaging hero sections, landing pages, or any web interface that needs a touch of cosmic elegance.
+The ultimate animated space background library. Create stunning starfields, nebulas, auroras & shooting stars with one line of code. Features 6 built-in themes, click interactions, touch support & zero dependencies!
 
-![Version](https://img.shields.io/badge/version-1.4.0-blue.svg)
+![Version](https://img.shields.io/badge/version-2.1.1-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 ## ✨ Features
 
-- 🌟 **Realistic Star Distribution** - 800+ stars with natural brightness (70% dim, 20% medium, 7% bright, 3% very bright with glow)
-- ✨ **Subtle Twinkling** - Configurable twinkling effect that's not overdone
-- 💫 **Bright Star Glow** - Very bright stars feature a beautiful radial glow effect
-- ☄️ **Varying Speed Meteors** - Shooting stars with slow (40%), medium (40%), and fast (20%) speeds
-- 🎨 **Star Color Variations** - Subtle white, warm white, cool blue, and yellow tints
-- 🔄 **Parallax Effect** - Mouse movement creates 3D depth illusion (NEW in v1.4.0)
-- 🌌 **Nebula Clouds** - Optional atmospheric nebula clouds for extra depth (NEW in v1.4.0)
-- 💫 **Pulsating Stars** - Bright stars gently pulse for added realism (NEW in v1.4.0)
-- ⏸️ **Pause/Resume** - Control animation playback (NEW in v1.4.0)
-- 📱 **Responsive** - Automatically adapts to canvas/window size with consistent star density
-- ⚡ **Lightweight** - Pure vanilla JavaScript, no dependencies
+- 🌟 **Realistic Star Distribution** - 800+ stars with natural brightness distribution and subtle twinkling
+- 🎨 **6 Built-in Themes** - midnight, aurora, nebula, cosmic, deep-space, warm-galaxy
+- ✨ **Aurora Borealis Effect** - Stunning northern lights animation with customizable colors
+- 💫 **Interactive Meteors** - Click/tap to spawn shooting stars with varying speeds and colors
+- 🌌 **Nebula Clouds** - Atmospheric depth with drifting colorful clouds
+- 🔄 **Parallax Effect** - Mouse movement creates 3D depth illusion
+- 📱 **Touch Support** - Full mobile and tablet interaction support
+- ⚡ **High Performance** - Optimized rendering with configurable performance modes
+- 🎯 **Star Clusters** - Realistic constellation patterns and grouped formations
+- 💫 **Bright Star Glow** - Special radial glow effects on the brightest stars
+- ⏸️ **Pause/Resume** - Full animation playback control
+- 📱 **Responsive** - Automatically adapts to canvas/window size
+- ⚡ **Lightweight** - Pure vanilla JavaScript, zero dependencies
 - 🎯 **Easy Integration** - Simple API, works with any framework
-- 🔧 **Backward Compatible** - Still exports `ConstellationBackground` for existing users
+- 🔧 **Backward Compatible** - Exports `CosmicCanvas`, `RealisticStarfield`, and `ConstellationBackground`
 
-## 🆕 What's New in v1.4.0
+## 🆕 What's New in v2.1.1
 
-- **Parallax Effect** - Move your mouse to see stars shift with depth perception
-- **Nebula Clouds** - Optional colorful nebula clouds that drift slowly in the background
-- **Pulsating Stars** - Bright stars now gently pulse for more realistic appearance
-- **Pause/Resume** - New methods to control animation: `pause()`, `resume()`, `togglePause()`
-- **Paused Getter** - Check animation state with the `paused` property
-- **Static Version** - Access version via `RealisticStarfield.version`
-- **Improved Performance** - Smoother parallax interpolation
-- **Enhanced Options** - New configuration options for all new features
-- **TypeScript Definitions** - Type definitions included in dist
+### 🚀 Major Rewrite - CosmicCanvas Engine
+- **New Class Name** - Now `CosmicCanvas` (with `RealisticStarfield` alias for compatibility)
+- **6 Built-in Themes** - Pre-configured themes: `midnight`, `aurora`, `nebula`, `cosmic`, `deep-space`, `warm-galaxy`
+- **Aurora Borealis** - Stunning northern lights effect with wave animations
+- **Interactive Meteors** - Click/tap anywhere to spawn shooting stars
+- **Touch Support** - Full mobile and tablet support with touch events
+- **Star Clusters** - Realistic constellation groupings and formations
+- **Performance Modes** - Configurable performance levels for different devices
+- **Enhanced API** - More intuitive configuration and control methods
 
-### New Options in v1.4.0
+### 🎨 Built-in Themes
+```javascript
+// Use any built-in theme
+const canvas = new CosmicCanvas({
+  theme: 'aurora' // midnight, aurora, nebula, cosmic, deep-space, warm-galaxy
+});
+```
+
+### ✨ New Interactive Features
+- **Click-to-Spawn** - Click anywhere to create meteors
+- **Touch Events** - Tap on mobile devices
+- **Aurora Animation** - Flowing northern lights effect
+- **Star Clustering** - Realistic constellation patterns
+
+### Key Options in v2.1.1
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
+| `theme` | string | `'midnight'` | Built-in theme: midnight, aurora, nebula, cosmic, deep-space, warm-galaxy |
+| `enableInteraction` | boolean | `true` | Enable click/touch to spawn meteors |
+| `enableAurora` | boolean | `false` | Enable aurora borealis effect (auto-enabled in aurora theme) |
+| `enableClusters` | boolean | `true` | Enable star cluster formations |
+| `performanceMode` | string | `'auto'` | Performance level: 'low', 'medium', 'high', 'auto' |
+| `touchSupport` | boolean | `true` | Enable mobile touch events |
 | `enableParallax` | boolean | `true` | Enable parallax effect on mouse movement |
-| `parallaxStrength` | number | `0.02` | Strength of parallax effect (0-1) |
-| `enableNebula` | boolean | `false` | Enable nebula cloud background |
-| `nebulaOpacity` | number | `0.15` | Opacity of nebula clouds (0-1) |
-| `nebulaColors` | array | `['#4a0080', '#000066', '#003366']` | Colors for nebula clouds |
-| `enablePulsate` | boolean | `true` | Enable pulsating effect on bright stars |
+| `enableNebula` | boolean | varies | Enable nebula clouds (theme-dependent) |
+| `starCount` | number | varies | Number of stars to render (theme-dependent) |
 
-### New Methods in v1.4.0
+### Methods in v2.1.1
 
 ```javascript
-// Pause the animation
-starfield.pause();
+// Create with theme
+const canvas = new CosmicCanvas({ theme: 'aurora' });
 
-// Resume the animation
-starfield.resume();
+// Control animation
+canvas.pause();
+canvas.resume();
+canvas.togglePause();
 
-// Toggle pause/resume (returns new pause state)
-const isPaused = starfield.togglePause();
-
-// Check if paused
-if (starfield.paused) {
+// Check state
+if (canvas.paused) {
   console.log('Animation is paused');
 }
 
 // Get version
-console.log(RealisticStarfield.version); // "1.4.0"
+console.log(CosmicCanvas.VERSION); // "2.0.0"
+console.log(RealisticStarfield.version); // "2.0.0" (alias)
 ```
 
 ## 📦 Installation
@@ -146,19 +165,17 @@ npm test
     <script>
         const canvas = document.getElementById('starfield-canvas');
         
-        // Create starfield with default settings (recommended)
-        const starfield = new RealisticStarfield(canvas);
+        // Create starfield with theme (recommended)
+        const starfield = new CosmicCanvas(canvas, { theme: 'aurora' });
 
-        // OR with custom options (v1.4.0):
-        // const starfield = new RealisticStarfield(canvas, {
+        // OR with custom options:
+        // const starfield = new CosmicCanvas(canvas, {
         //     starCount: 1000,              // More stars
-        //     backgroundColor: '#0a0a0a',   // Slightly lighter black
-        //     meteorInterval: 6000,         // Meteor every 6 seconds
-        //     meteorAngle: 40,              // Steeper angle
-        //     enableMeteors: true,          // Enable shooting stars
-        //     enableTwinkle: true,          // Enable twinkling
-        //     twinkleIntensity: 0.4,        // Twinkle amount (0-1)
-        //     enableParallax: true,         // Enable parallax effect
+        //     backgroundColor: '#0a0a0a',   // Custom background
+        //     enableAurora: true,           // Enable aurora effect
+        //     enableInteraction: true,      // Click to spawn meteors
+        //     performanceMode: 'high',      // Performance level
+        //     touchSupport: true,           // Mobile support
         //     parallaxStrength: 0.03,       // Parallax intensity
         //     enableNebula: true,           // Enable nebula clouds
         //     nebulaOpacity: 0.2,           // Nebula visibility
@@ -200,7 +217,7 @@ npm test
         // import { ConstellationBackground } from './src/index.js';
         
         const canvas = document.getElementById('starfield-canvas');
-        const starfield = new RealisticStarfield(canvas);
+        const starfield = new CosmicCanvas(canvas, { theme: 'aurora' });
     </script>
 </body>
 </html>
@@ -214,7 +231,7 @@ npm test
 
 ```jsx
 import React, { useEffect, useRef } from 'react';
-import RealisticStarfield from 'my-constellation-bg';
+import CosmicCanvas from 'my-constellation-bg';
 
 function App() {
   const canvasRef = useRef(null);
@@ -222,9 +239,9 @@ function App() {
 
   useEffect(() => {
     if (canvasRef.current) {
-      starfieldRef.current = new RealisticStarfield(canvasRef.current, {
-        starCount: 800,
-        meteorInterval: 8000
+      starfieldRef.current = new CosmicCanvas(canvasRef.current, {
+        theme: 'cosmic',
+        enableInteraction: true
       });
     }
 
@@ -747,7 +764,27 @@ Tested on: Chrome, Firefox, Safari, Edge
 ---
 
 ## � Changelog
+### v2.1.1 (2026-02-01)
+**Major Rewrite - CosmicCanvas Engine**
+- 🚀 **Complete Rewrite**: New `CosmicCanvas` class with enhanced architecture
+- 🎨 **6 Built-in Themes**: midnight, aurora, nebula, cosmic, deep-space, warm-galaxy
+- ✨ **Aurora Borealis**: Stunning northern lights animation with wave effects
+- 💫 **Interactive Meteors**: Click/tap anywhere to spawn shooting stars
+- 📱 **Touch Support**: Full mobile and tablet interaction support
+- 🌟 **Star Clusters**: Realistic constellation patterns and groupings
+- ⚡ **Performance Modes**: Configurable performance levels (low/medium/high/auto)
+- 🔄 **Enhanced Parallax**: Improved mouse movement depth effects
+- 🔧 **Backward Compatibility**: Maintains `RealisticStarfield` and `ConstellationBackground` exports
+- 📝 **TypeScript Support**: Full type definitions included
+- 🏠 **Better API**: More intuitive configuration and control methods
 
+### v1.4.0 (Previous)
+**Parallax & Nebula Update**
+- 🔄 **Parallax Effect**: Mouse movement creates 3D depth illusion
+- 🌌 **Nebula Clouds**: Optional atmospheric nebula clouds
+- 💫 **Pulsating Stars**: Bright stars gently pulse for realism
+- ⏸️ **Pause/Resume**: Animation playback control methods
+- 📊 **Performance**: Smoother rendering and interpolation
 ### v1.2.0 (2026-01-02)
 **Major Update - Grok-style Improvements**
 - ✨ **Fixed Position Stars**: Stars now have anchor positions with subtle drift movement

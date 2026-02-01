@@ -662,8 +662,9 @@ class CosmicCanvas {
   }
 }
 
-// For backward compatibility, also export as ConstellationBackground
-const ConstellationBackground = RealisticStarfield;
+// For backward compatibility, also export as ConstellationBackground and RealisticStarfield
+const ConstellationBackground = CosmicCanvas;
+const RealisticStarfield = CosmicCanvas;
 
-export default RealisticStarfield;
-export { RealisticStarfield, ConstellationBackground };
+export default CosmicCanvas;
+export { CosmicCanvas, RealisticStarfield, ConstellationBackground };

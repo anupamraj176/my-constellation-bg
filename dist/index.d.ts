@@ -1,195 +1,103 @@
 /**
- * RealisticStarfield v1.4.0
- * A realistic animated starfield background inspired by night sky photography
+ * CosmicCanvas v2.0.0
+ * The ultimate animated space background library
  */
 
-export interface StarColor {
-  r: number;
-  g: number;
-  b: number;
-}
-
-export interface Star {
-  x: number;
-  y: number;
-  radius: number;
-  brightness: number;
-  baseBrightness: number;
-  twinkleSpeed: number;
-  twinkleOffset: number;
-  twinkleAmount: number;
-  color: StarColor;
-  hasGlow: boolean;
-}
-
-export interface Meteor {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  opacity: number;
-  tail: Array<{ x: number; y: number }>;
-  maxTailLength: number;
-  thickness: number;
-  fadeRate: number;
-  speedType: 'slow' | 'medium' | 'fast';
-}
-
-export interface NebulaCloud {
-  x: number;
-  y: number;
-  radius: number;
-  color: string;
-  opacity: number;
-  drift: {
-    x: number;
-    y: number;
-  };
-}
-
-export interface RealisticStarfieldOptions {
-  /** Number of stars to render (default: 800) */
+export interface CosmicCanvasOptions {
+  /** Built-in theme name */
+  theme?: 'midnight' | 'nebula' | 'aurora' | 'galaxy' | 'minimal' | 'synthwave';
+  /** Number of stars (default: 800) */
   starCount?: number;
-  /** Background color (default: '#000000') */
+  /** Canvas background color (default: '#000000') */
   backgroundColor?: string;
-  /** Interval between automatic meteors in ms (default: 8000) */
+  /** Time between auto meteors in ms (default: 8000) */
   meteorInterval?: number;
-  /** Angle of meteor trajectory in degrees (default: 35) */
+  /** Meteor angle in degrees (default: 35) */
   meteorAngle?: number;
   /** Enable shooting stars (default: true) */
   enableMeteors?: boolean;
-  /** Enable twinkling effect (default: true) */
+  /** Enable star twinkling (default: true) */
   enableTwinkle?: boolean;
-  /** Intensity of twinkling effect 0-1 (default: 0.3) */
+  /** Twinkle intensity 0-1 (default: 0.3) */
   twinkleIntensity?: number;
-  /** Enable parallax effect on mouse movement (default: true) */
+  /** Enable parallax on mouse move (default: true) */
   enableParallax?: boolean;
-  /** Strength of parallax effect 0-1 (default: 0.02) */
+  /** Parallax strength 0-1 (default: 0.02) */
   parallaxStrength?: number;
-  /** Enable nebula cloud background (default: false) */
+  /** Enable nebula clouds (default: false) */
   enableNebula?: boolean;
-  /** Opacity of nebula clouds 0-1 (default: 0.15) */
+  /** Nebula opacity 0-1 (default: 0.15) */
   nebulaOpacity?: number;
-  /** Array of colors for nebula clouds (default: ['#4a0080', '#000066', '#003366']) */
+  /** Nebula cloud colors */
   nebulaColors?: string[];
-  /** Enable pulsating effect on bright stars (default: true) */
+  /** Enable pulsating bright stars (default: true) */
   enablePulsate?: boolean;
+  /** Enable aurora effect (default: false) */
+  enableAurora?: boolean;
+  /** Aurora intensity 0-1 (default: 0.3) */
+  auroraIntensity?: number;
+  /** Aurora animation speed (default: 0.5) */
+  auroraSpeed?: number;
+  /** Aurora wave colors */
+  auroraColors?: string[];
+  /** Enable star clusters (default: false) */
+  enableClusters?: boolean;
+  /** Number of star clusters (default: 3) */
+  clusterCount?: number;
+  /** Enable click/tap to spawn meteors (default: true) */
+  enableClickEffect?: boolean;
+  /** Number of meteors spawned on click (default: 5) */
+  clickSpawnCount?: number;
+  /** Enable touch support (default: true) */
+  enableTouch?: boolean;
+  /** Reduce effects for better performance (default: false) */
+  performanceMode?: boolean;
+  /** Frame rate limit, 0 = unlimited (default: 0) */
+  fpsLimit?: number;
 }
 
-export declare class RealisticStarfield {
-  /** Canvas element being used */
-  canvas: HTMLCanvasElement;
-  /** Canvas 2D rendering context */
-  ctx: CanvasRenderingContext2D;
-  /** Current configuration options */
-  options: Required<RealisticStarfieldOptions>;
-  /** Array of star objects */
-  stars: Star[];
-  /** Array of active meteors */
-  meteors: Meteor[];
-  /** Array of nebula clouds */
-  nebulaClouds: NebulaCloud[];
-  /** Animation frame ID */
-  animationId: number | null;
-  /** Whether animation is paused */
-  isPaused: boolean;
+export interface ThemeConfig {
+  backgroundColor?: string;
+  starCount?: number;
+  enableNebula?: boolean;
+  nebulaOpacity?: number;
+  nebulaColors?: string[];
+  enableAurora?: boolean;
+  auroraIntensity?: number;
+  auroraColors?: string[];
+  enableClusters?: boolean;
+  enableMeteors?: boolean;
+  twinkleIntensity?: number;
+}
 
-  /**
-   * Create a new RealisticStarfield instance
-   * @param canvas - The canvas element to render on
-   * @param options - Configuration options
-   */
-  constructor(canvas: HTMLCanvasElement, options?: RealisticStarfieldOptions);
+export declare class CosmicCanvas {
+  static readonly VERSION: string;
+  static readonly THEMES: Record<string, ThemeConfig>;
+  static readonly version: string;
+  static readonly themes: string[];
 
-  /**
-   * Initialize the starfield
-   */
-  init(): void;
+  constructor(canvas: HTMLCanvasElement, options?: CosmicCanvasOptions);
 
-  /**
-   * Resize the canvas and reinitialize stars
-   */
-  resize(): void;
+  readonly paused: boolean;
+  readonly options: CosmicCanvasOptions;
 
-  /**
-   * Initialize nebula clouds
-   */
-  initNebulaClouds(): void;
-
-  /**
-   * Initialize stars with realistic distribution
-   */
-  initStars(): void;
-
-  /**
-   * Get a random star color
-   */
-  getStarColor(): StarColor;
-
-  /**
-   * Create a new shooting star/meteor
-   */
-  createMeteor(): void;
-
-  /**
-   * Bind event listeners for resize and mouse movement
-   */
-  bindEvents(): void;
-
-  /**
-   * Render nebula clouds
-   */
-  renderNebula(ctx: CanvasRenderingContext2D): void;
-
-  /**
-   * Main animation loop
-   */
-  animate(currentTime?: number): void;
-
-  /**
-   * Destroy the starfield and cleanup all resources
-   */
-  destroy(): void;
-
-  /**
-   * Pause the animation
-   */
+  /** Switch to a built-in theme */
+  setTheme(themeName: string): void;
+  /** Update options dynamically */
+  setOptions(options: Partial<CosmicCanvasOptions>): void;
+  /** Spawn a shooting star at optional position */
+  triggerMeteor(x?: number | null, y?: number | null): void;
+  /** Pause the animation */
   pause(): void;
-
-  /**
-   * Resume the animation
-   */
+  /** Resume the animation */
   resume(): void;
-
-  /**
-   * Toggle pause/resume state
-   * @returns The new paused state
-   */
+  /** Toggle pause state, returns new state */
   togglePause(): boolean;
-
-  /**
-   * Check if animation is paused
-   */
-  get paused(): boolean;
-
-  /**
-   * Update options dynamically
-   * @param newOptions - New options to merge with existing options
-   */
-  setOptions(newOptions: Partial<RealisticStarfieldOptions>): void;
-
-  /**
-   * Manually trigger a meteor
-   */
-  triggerMeteor(): void;
-
-  /**
-   * Get the current version
-   */
-  static get version(): string;
+  /** Clean up and remove event listeners */
+  destroy(): void;
 }
 
-/** Backward compatibility alias for RealisticStarfield */
-export declare const ConstellationBackground: typeof RealisticStarfield;
+export declare const RealisticStarfield: typeof CosmicCanvas;
+export declare const ConstellationBackground: typeof CosmicCanvas;
 
-export default RealisticStarfield;
+export default CosmicCanvas;
