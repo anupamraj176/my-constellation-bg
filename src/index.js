@@ -1,56 +1,157 @@
 /**
- * RealisticStarfield v1.4.0
- * Creates a realistic night sky background inspired by actual star photography
+ * CosmicCanvas v2.0.0
+ * The ultimate animated space background library
+ * 
  * Features:
- * - Dense starfield with natural brightness distribution
- * - Subtle twinkling animation
- * - Shooting stars with varying speeds (slow, medium, fast)
- * - Pure black deep space background
- * - Parallax effect on mouse movement
+ * - Realistic starfield with natural brightness distribution
+ * - Shooting stars with varying speeds
+ * - Interactive click-to-spawn meteors
+ * - Star clusters and constellation patterns
+ * - Aurora borealis effect
  * - Nebula clouds for atmospheric depth
+ * - Parallax effect on mouse movement
+ * - Multiple preset themes
+ * - Touch support for mobile
+ * - High performance mode
  * - Pause/Resume functionality
- * - Improved performance with optimizations
+ * - Full TypeScript support
+ * 
+ * @author Anupam Raj
+ * @license MIT
  */
-class RealisticStarfield {
+class CosmicCanvas {
+  static VERSION = '2.0.0';
+
+  // Built-in theme presets
+  static THEMES = {
+    midnight: {
+      backgroundColor: '#000000',
+      starCount: 800,
+      enableNebula: false,
+      enableAurora: false,
+      nebulaColors: ['#4a0080', '#000066', '#003366'],
+      auroraColors: ['#00ff88', '#00ffcc', '#0088ff'],
+    },
+    nebula: {
+      backgroundColor: '#050510',
+      starCount: 600,
+      enableNebula: true,
+      nebulaOpacity: 0.25,
+      nebulaColors: ['#4a0080', '#800040', '#000066'],
+      enableAurora: false,
+    },
+    aurora: {
+      backgroundColor: '#000508',
+      starCount: 500,
+      enableNebula: false,
+      enableAurora: true,
+      auroraIntensity: 0.4,
+      auroraColors: ['#00ff88', '#00ffcc', '#88ff00'],
+    },
+    galaxy: {
+      backgroundColor: '#020108',
+      starCount: 1200,
+      enableNebula: true,
+      nebulaOpacity: 0.2,
+      nebulaColors: ['#330066', '#000033', '#003333'],
+      enableAurora: false,
+      enableClusters: true,
+    },
+    minimal: {
+      backgroundColor: '#0a0a0a',
+      starCount: 300,
+      enableNebula: false,
+      enableAurora: false,
+      enableMeteors: false,
+      twinkleIntensity: 0.15,
+    },
+    synthwave: {
+      backgroundColor: '#0d0221',
+      starCount: 400,
+      enableNebula: true,
+      nebulaOpacity: 0.3,
+      nebulaColors: ['#ff00ff', '#00ffff', '#ff0080'],
+      enableAurora: false,
+    },
+  };
+
   constructor(canvas, options = {}) {
+    if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
+      throw new Error('CosmicCanvas requires a valid canvas element');
+    }
+
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
 
-    // Configuration for realistic starfield
+    // Apply theme if specified
+    const themeOptions = options.theme && CosmicCanvas.THEMES[options.theme] 
+      ? CosmicCanvas.THEMES[options.theme] 
+      : {};
+
+    // Configuration with defaults
     this.options = {
-      // Star density - more stars for realistic look
+      // Star settings
       starCount: 800,
-      // Background - pure black like deep space
       backgroundColor: '#000000',
-      // Shooting star timing
+      
+      // Meteor settings
       meteorInterval: 8000,
-      // Fixed meteor angle (diagonal)
       meteorAngle: 35,
-      // Enable/disable shooting stars
       enableMeteors: true,
-      // Enable/disable twinkling
+      
+      // Twinkle settings
       enableTwinkle: true,
-      // Twinkle intensity (0-1)
       twinkleIntensity: 0.3,
-      // NEW v1.4.0: Parallax effect on mouse movement
+      
+      // Parallax settings
       enableParallax: true,
-      // Parallax strength (0-1)
       parallaxStrength: 0.02,
-      // NEW v1.4.0: Nebula clouds
+      
+      // Nebula settings
       enableNebula: false,
-      // Nebula opacity (0-1)
       nebulaOpacity: 0.15,
-      // Nebula colors
       nebulaColors: ['#4a0080', '#000066', '#003366'],
-      // NEW v1.4.0: Pulsating bright stars
+      
+      // Pulsate settings
       enablePulsate: true,
+      
+      // NEW v2.0: Aurora effect
+      enableAurora: false,
+      auroraIntensity: 0.3,
+      auroraSpeed: 0.5,
+      auroraColors: ['#00ff88', '#00ffcc', '#0088ff'],
+      
+      // NEW v2.0: Star clusters
+      enableClusters: false,
+      clusterCount: 3,
+      
+      // NEW v2.0: Interactive click effects
+      enableClickEffect: true,
+      clickSpawnCount: 5,
+      
+      // NEW v2.0: Performance mode
+      performanceMode: false,
+      
+      // NEW v2.0: Touch support
+      enableTouch: true,
+      
+      // NEW v2.0: FPS limit (0 = unlimited)
+      fpsLimit: 0,
+
+      // Apply theme first, then user options
+      ...themeOptions,
       ...options,
     };
 
+    // State
     this.stars = [];
     this.meteors = [];
     this.nebulaClouds = [];
+    this.clusters = [];
+    this.auroraWaves = [];
+    this.clickEffects = [];
     this.lastMeteorTime = 0;
+    this.lastFrameTime = 0;
     this.animationId = null;
     this.isPaused = false;
     this.mouseX = 0;
@@ -58,11 +159,14 @@ class RealisticStarfield {
     this.targetMouseX = 0;
     this.targetMouseY = 0;
 
+    // Bound handlers for cleanup
+    this._boundHandlers = {};
+
     this.init();
   }
 
   /**
-   * Initialize the starfield
+   * Initialize the cosmic canvas
    */
   init() {
     this.resize();
@@ -74,11 +178,84 @@ class RealisticStarfield {
    * Handle canvas resize
    */
   resize() {
-    this.canvas.width = this.canvas.offsetWidth || window.innerWidth;
-    this.canvas.height = this.canvas.offsetHeight || window.innerHeight;
+    const dpr = this.options.performanceMode ? 1 : Math.min(window.devicePixelRatio || 1, 2);
+    const rect = this.canvas.getBoundingClientRect();
+    
+    this.canvas.width = (rect.width || window.innerWidth) * dpr;
+    this.canvas.height = (rect.height || window.innerHeight) * dpr;
+    this.ctx.scale(dpr, dpr);
+    
+    this.displayWidth = rect.width || window.innerWidth;
+    this.displayHeight = rect.height || window.innerHeight;
+
     this.initStars();
+    
     if (this.options.enableNebula) {
       this.initNebulaClouds();
+    }
+    
+    if (this.options.enableClusters) {
+      this.initClusters();
+    }
+    
+    if (this.options.enableAurora) {
+      this.initAurora();
+    }
+  }
+
+  /**
+   * Initialize star clusters
+   */
+  initClusters() {
+    this.clusters = [];
+    const { clusterCount } = this.options;
+    
+    for (let i = 0; i < clusterCount; i++) {
+      const centerX = Math.random() * this.displayWidth;
+      const centerY = Math.random() * this.displayHeight * 0.6;
+      const starCount = 20 + Math.floor(Math.random() * 30);
+      const radius = 50 + Math.random() * 100;
+      
+      for (let j = 0; j < starCount; j++) {
+        const angle = Math.random() * Math.PI * 2;
+        const distance = Math.random() * radius;
+        const x = centerX + Math.cos(angle) * distance;
+        const y = centerY + Math.sin(angle) * distance;
+        
+        this.stars.push({
+          x,
+          y,
+          radius: 0.4 + Math.random() * 0.6,
+          brightness: 0.5 + Math.random() * 0.4,
+          baseBrightness: 0.5 + Math.random() * 0.4,
+          twinkleSpeed: 0.001 + Math.random() * 0.002,
+          twinkleOffset: Math.random() * Math.PI * 2,
+          twinkleAmount: 0.2,
+          color: this.getStarColor(),
+          hasGlow: Math.random() > 0.8,
+          isCluster: true,
+        });
+      }
+    }
+  }
+
+  /**
+   * Initialize aurora waves
+   */
+  initAurora() {
+    this.auroraWaves = [];
+    const waveCount = 3;
+    
+    for (let i = 0; i < waveCount; i++) {
+      this.auroraWaves.push({
+        y: this.displayHeight * (0.1 + i * 0.15),
+        amplitude: 30 + Math.random() * 50,
+        frequency: 0.002 + Math.random() * 0.002,
+        speed: (0.3 + Math.random() * 0.4) * this.options.auroraSpeed,
+        phase: Math.random() * Math.PI * 2,
+        color: this.options.auroraColors[i % this.options.auroraColors.length],
+        opacity: (0.1 + Math.random() * 0.1) * this.options.auroraIntensity,
+      });
     }
   }
 
@@ -87,67 +264,66 @@ class RealisticStarfield {
    */
   initNebulaClouds() {
     this.nebulaClouds = [];
-    const cloudCount = 3 + Math.floor(Math.random() * 3);
+    const cloudCount = 4 + Math.floor(Math.random() * 3);
     
     for (let i = 0; i < cloudCount; i++) {
       this.nebulaClouds.push({
-        x: Math.random() * this.canvas.width,
-        y: Math.random() * this.canvas.height,
-        radius: 100 + Math.random() * 200,
+        x: Math.random() * this.displayWidth,
+        y: Math.random() * this.displayHeight,
+        radius: 120 + Math.random() * 200,
         color: this.options.nebulaColors[Math.floor(Math.random() * this.options.nebulaColors.length)],
         opacity: 0.05 + Math.random() * this.options.nebulaOpacity,
         drift: {
-          x: (Math.random() - 0.5) * 0.1,
-          y: (Math.random() - 0.5) * 0.1
-        }
+          x: (Math.random() - 0.5) * 0.08,
+          y: (Math.random() - 0.5) * 0.08,
+        },
       });
     }
   }
 
   /**
    * Create realistic star distribution
-   * Most stars are tiny and dim, few are bright (like real night sky)
    */
   initStars() {
+    const clusterStars = this.stars.filter(s => s.isCluster);
     this.stars = [];
-    const { starCount } = this.options;
-    const area = this.canvas.width * this.canvas.height;
-    // Adjust star count based on screen size for consistent density
-    const adjustedCount = Math.floor((starCount * area) / (1920 * 1080));
+    
+    const { starCount, performanceMode } = this.options;
+    const area = this.displayWidth * this.displayHeight;
+    const baseArea = 1920 * 1080;
+    let adjustedCount = Math.floor((starCount * area) / baseArea);
+    
+    if (performanceMode) {
+      adjustedCount = Math.floor(adjustedCount * 0.6);
+    }
 
     for (let i = 0; i < adjustedCount; i++) {
-      // Realistic magnitude distribution (most stars are dim)
       const magnitude = Math.random();
       let radius, brightness, twinkleAmount;
 
       if (magnitude < 0.7) {
-        // 70% - Very dim, tiny stars (like distant stars)
         radius = 0.3 + Math.random() * 0.4;
         brightness = 0.15 + Math.random() * 0.25;
         twinkleAmount = 0.1;
       } else if (magnitude < 0.9) {
-        // 20% - Medium stars
         radius = 0.5 + Math.random() * 0.6;
         brightness = 0.4 + Math.random() * 0.3;
         twinkleAmount = 0.2;
       } else if (magnitude < 0.97) {
-        // 7% - Bright stars
         radius = 0.8 + Math.random() * 0.8;
         brightness = 0.7 + Math.random() * 0.2;
         twinkleAmount = 0.3;
       } else {
-        // 3% - Very bright stars (with glow effect)
         radius = 1.2 + Math.random() * 1.0;
         brightness = 0.85 + Math.random() * 0.15;
         twinkleAmount = 0.15;
       }
 
-      // Subtle color variations (like real stars)
       const color = this.getStarColor();
 
       this.stars.push({
-        x: Math.random() * this.canvas.width,
-        y: Math.random() * this.canvas.height,
+        x: Math.random() * this.displayWidth,
+        y: Math.random() * this.displayHeight,
         radius,
         brightness,
         baseBrightness: brightness,
@@ -156,8 +332,11 @@ class RealisticStarfield {
         twinkleAmount,
         color,
         hasGlow: magnitude >= 0.97,
+        isCluster: false,
       });
     }
+    
+    this.stars = [...this.stars, ...clusterStars];
   }
 
   /**
@@ -165,34 +344,35 @@ class RealisticStarfield {
    */
   getStarColor() {
     const colorType = Math.random();
-    if (colorType < 0.6) {
-      return { r: 255, g: 255, b: 255 }; // White
-    } else if (colorType < 0.75) {
-      return { r: 255, g: 252, b: 240 }; // Warm white
-    } else if (colorType < 0.9) {
-      return { r: 240, g: 245, b: 255 }; // Cool white/blue
+    if (colorType < 0.55) {
+      return { r: 255, g: 255, b: 255 };
+    } else if (colorType < 0.70) {
+      return { r: 255, g: 252, b: 240 };
+    } else if (colorType < 0.85) {
+      return { r: 240, g: 245, b: 255 };
+    } else if (colorType < 0.93) {
+      return { r: 255, g: 248, b: 220 };
+    } else if (colorType < 0.97) {
+      return { r: 255, g: 200, b: 200 };
     } else {
-      return { r: 255, g: 248, b: 220 }; // Slight yellow
+      return { r: 200, g: 220, b: 255 };
     }
   }
 
   /**
-   * Create shooting star with realistic trajectory and varying speeds
+   * Create shooting star with realistic trajectory
    */
-  createMeteor() {
+  createMeteor(x = null, y = null) {
     const angle = (this.options.meteorAngle * Math.PI) / 180;
 
-    // Start from upper portion of screen
-    const startX = Math.random() * this.canvas.width * 0.7;
-    const startY = Math.random() * this.canvas.height * 0.3;
+    const startX = x !== null ? x : Math.random() * this.displayWidth * 0.7;
+    const startY = y !== null ? y : Math.random() * this.displayHeight * 0.3;
 
-    // Varying speeds: 40% slow, 40% medium, 20% fast
     const speedType = Math.random();
     let speed, tailLength, thickness, fadeRate;
 
     if (speedType < 0.4) {
-      // Slow, graceful meteor - more visible, longer lasting
-      speed = 2 + Math.random() * 1.5;  // 2-3.5 (slower)
+      speed = 2 + Math.random() * 1.5;
       tailLength = 80;
       thickness = 1.2;
       fadeRate = 0.001;

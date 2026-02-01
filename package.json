@@ -1,10 +1,17 @@
 {
   "name": "my-constellation-bg",
-  "version": "1.4.0",
-  "description": "A realistic animated starfield background inspired by night sky photography, featuring dense stars with natural brightness distribution, shooting stars, nebula clouds, and parallax effects",
+  "version": "2.0.0",
+  "description": "🌌 The ultimate animated space background library. Create stunning starfields, nebulas, auroras & shooting stars with one line of code. 6 built-in themes, click interactions, touch support & zero dependencies!",
   "main": "dist/index.js",
   "module": "src/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "files": [
     "dist",
     "src"
@@ -19,9 +26,33 @@
     "night-sky",
     "shooting-stars",
     "meteors",
-    "space"
+    "space",
+    "cosmos",
+    "galaxy",
+    "nebula",
+    "aurora",
+    "parallax",
+    "interactive",
+    "hero-section",
+    "landing-page",
+    "cosmic",
+    "universe",
+    "animated-background",
+    "canvas-animation",
+    "webgl-alternative",
+    "particle-effect",
+    "react-background",
+    "vue-background",
+    "vanilla-js",
+    "lightweight",
+    "no-dependencies",
+    "responsive",
+    "mobile-friendly",
+    "touch-support",
+    "themes",
+    "customizable"
   ],
-  "author": "Anupam Raj",
+  "author": "Anupam Raj <anupamraj176@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -31,12 +62,21 @@
   "bugs": {
     "url": "https://github.com/anupamraj176/my-constellation-bg/issues"
   },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/anupamraj176"
+  },
   "type": "module",
+  "sideEffects": false,
   "scripts": {
     "build": "node build.js",
-    "test": "node test.js"
+    "test": "node test.js",
+    "prepublishOnly": "npm run build"
   },
-  "dependencies": {
+  "devDependencies": {
     "esbuild": "^0.27.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
   }
 }
