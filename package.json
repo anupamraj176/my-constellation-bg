@@ -1,6 +1,6 @@
 {
   "name": "my-constellation-bg",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "🌌 The ultimate animated space background library. Create stunning starfields, nebulas, auroras & shooting stars with one line of code. 6 built-in themes, click interactions, touch support & zero dependencies!",
   "main": "dist/index.js",
   "module": "src/index.js",
